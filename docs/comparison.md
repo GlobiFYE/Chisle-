@@ -4,23 +4,23 @@
 
 Use them if they fit. We test against them honestly, and the latest numbers are less flattering to everyone, Chisle included.
 
-Re-measured 2026-10-01: 13 live prompts × 2 seeds on Haiku 4.5, each tool's current version, billed output tokens as % of the no-tool baseline ([writeup + raw cells](../benchmarks/results/2026-10-01-live-rerun.md)):
+Re-measured 2026-10-12 with tools off: 13 live prompts × 2 seeds on Haiku 4.5, billed output tokens as % of the no-tool baseline ([writeup + raw cells](../benchmarks/results/2026-10-12-tools-off-rerun.md)). This replaces the 2026-10-01 run, which left Claude Code's tools on ([#37](https://github.com/JayPokale/Chisle/issues/37)):
 
-| | total bill | 95% CI | worst cell | times worse than no tool | code judgment |
-|---|--:|--:|--:|--:|:--:|
-| caveman | 102% | 79–128% | 305% | 15 / 26 | ❌ no ladder |
-| ponytail | 105% | 86–129% | **493%** | **16 / 26** | ✅ |
-| **Chisle** | **83%** | **69–95%** | **170%** | **11 / 26** | ✅ |
+| | total bill | 95% CI | visible answer | worst cell | times worse than no tool |
+|---|--:|--:|--:|--:|--:|
+| caveman | 81% | 63–105% | 65% | 339% | 13 / 26 |
+| ponytail | 127% | 102–155% | 58% | 493% | 18 / 26 |
+| **Chisle** | **82%** | **67–104%** | **56%** | **194%** | **12 / 26** |
 
-Chisle is the only one of the three measurably below a bare model. None is immune to backfiring: every arm wrote more than no tool at all on at least 11 of 26 cells, mostly short prompts with nothing to cut.
+All three shorten answers by a similar amount; on coding prompts ponytail's are the shortest. On the bill Chisle and caveman tie and neither is clearly below a bare model; ponytail bills more because its reasoning grows almost 5×. None is immune to backfiring: every arm cost more than no tool at all on at least 12 of 26 cells, mostly short prompts with nothing to cut.
 
-The June–July run (20 tasks) put Chisle at 52% with one backfire. That headline leaned on a single outlier baseline and on cells an old ruleset example may have primed, and is superseded. The examples below are from that run.
+The June–July run (20 tasks) put Chisle at 52% with one backfire. That headline leaned on a single outlier baseline and on cells an old ruleset example may have primed, and its Haiku cells also ran with tools on; it is superseded. The examples below are from that run; the Sonnet ones (`caching`, `retry`) are single-turn.
 
 **caveman** is a superb prose compressor, a hair leaner than Chisle on pure-prose prompts, but it has no engineering judgment. Asked to *"add caching,"* it dumped three implementations (330 tokens) where Chisle gave one `@cache` + an upgrade line (151).
 
 **ponytail** has the engineering judgment but pads prose so hard it backfires. On a "retry logic" prompt it ran **227%** of the no-tool baseline. Yes: a "write less" tool, writing more than twice as much. Receipts: [`reliability writeup`](../benchmarks/results/2026-06-29-reliability.md).
 
-**Chisle's June backfire** (a comparison prompt answered with headed bullet walls) was root-caused and fixed in the ruleset. The October run shows short prompts still backfire for every tool, Chisle included; its edge is the smallest worst case, not immunity.
+**Chisle's June backfire** (a comparison prompt answered with headed bullet walls) was root-caused and fixed in the ruleset. The October run shows short prompts still backfire for every tool, Chisle included.
 
 Installing *both* specialists to cover both axes gets you two plugins that fight over prose style and double per-session overhead, and on one task they did *worse* stacked (605t) than Chisle alone (595t). Full data: [reliability](../benchmarks/results/2026-06-29-reliability.md) · [Sonnet cross-check](../benchmarks/results/2026-06-29-sonnet-cross-check.md).
 
@@ -35,6 +35,8 @@ One pass over a diff, file, or repo that flags **both** over-engineered code *an
 ## Detailed benchmark tables
 
 ### Per-segment breakdown (Haiku, 6 tasks)
+
+> June cells (`raw/`), recorded with Claude Code's tools on: 10 of 24 took more than one turn. Superseded by the [2026-10-12 tools-off run](../benchmarks/results/2026-10-12-tools-off-rerun.md); kept as the record.
 
 Visible answer size as % of the no-tool baseline, lower = leaner:
 

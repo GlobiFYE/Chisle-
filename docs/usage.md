@@ -159,8 +159,8 @@ Chisle borrows the best published token-saving techniques and implements the one
 
 | technique | source | in Chisle? |
 |---|---|---|
-| Prose compression persona | [caveman](https://github.com/JuliusBrussee/caveman) | ✅ + code judgment it lacks |
-| YAGNI/lazy-code ruleset | [ponytail](https://github.com/dietrichgebert/ponytail) | ✅ + prose discipline it lacks |
+| Prose compression persona | [caveman](https://github.com/JuliusBrussee/caveman) | ✅ Chisle's prose rules started from it |
+| YAGNI/lazy-code ruleset | [ponytail](https://github.com/dietrichgebert/ponytail) | ✅ Chisle's code rules started from it |
 | Tool-output elision (head/tail) | [headroom](https://github.com/headroomlabs-ai/headroom)-style, proxy-free | ✅ hook, no proxy, works on subscription OAuth |
 | ANSI strip / log crush / dedup | headroom transforms | ✅ scrub + dedup tiers |
 | Command rewriting at the source | RTK-style `PreToolUse` ([writeup](https://andrewpatterson.dev/posts/token-savings-rtk-headroom/)) | ❌ stacks; RTK shrinks at source, Chisle catches what it can't reach (subagents, MCP, web) |

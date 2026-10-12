@@ -42,7 +42,7 @@ export default function OG() {
           </div>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 28, color: "#a09fa8" }}>
-          <div>Claude Code · coding answers 33% shorter, 24% cheaper</div>
+          <div>Claude Code · coding answers about half as long</div>
           <div style={{ color: "#d78700" }}>npx chisle</div>
         </div>
       </div>

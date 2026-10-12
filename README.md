@@ -22,16 +22,16 @@
 </p>
 
 <p align="center">
-  <strong>Built for Claude Code: coding answers come back 33% shorter and 24% cheaper, while caveman and ponytail make them longer &middot; 12 agents &middot; zero dependencies &middot; one command</strong>
+  <strong>Built for Claude Code: coding answers come back about half as long, every number and loss published &middot; 12 agents &middot; zero dependencies &middot; one command</strong>
 </p>
 
 Chisle is a Claude Code plugin that makes Claude cheaper to run without making it dumber. It cuts what Claude writes: no filler, no hedging, no speculative abstractions, just the smallest code that works. It also cuts what Claude reads: a `PostToolUse` hook trims oversized tool output by ~46% before it re-enters the context window, where it would be re-billed on every later request. In agent-loop tests Claude with Chisle passes the same tasks as Claude without it. One `npx chisle` installs it, and the same ruleset ships to Pi, Cursor, Codex, Gemini, Copilot, OpenCode, Antigravity and four more agents. Every number here comes from committed raw transcripts, including the runs where it lost.
 
 <p align="center">
-  <img src="assets/benchmark-claude.svg" width="820" alt="Claude Code coding prompts, 14 cells on Haiku 4.5, as percent of the same model with no ruleset. Answer length: caveman 110%, ponytail 110%, Chisle 67%. Billed tokens: caveman 100%, ponytail 120%, Chisle 76%.">
+  <img src="assets/benchmark-claude.svg" width="820" alt="Claude Code coding prompts, 14 cells on Haiku 4.5, tools off, as percent of the same model with no ruleset. Answer length: caveman 57%, ponytail 47%, Chisle 52%. Billed tokens: caveman 69%, ponytail 154%, Chisle 79%.">
 </p>
 
-<p align="center"><sub>Claude Code 2.1.285 on Haiku 4.5, the 14 coding cells of a 26-cell run. Across all 26 prompts Chisle bills 83% where caveman bills 102% and ponytail 105%, the only one under 100%; on short answers it breaks even. <a href="#benchmarks">Full numbers below.</a></sub></p>
+<p align="center"><sub>Claude Code 2.1.285 on Haiku 4.5, tools off, the 14 coding cells of a 26-cell run. All three rulesets shorten answers by a similar amount. Across all 26 prompts Chisle bills 82%, caveman 81% and ponytail 127%; on short answers every ruleset costs more than none. <a href="#benchmarks">Full numbers below.</a></sub></p>
 
 ---
 
@@ -76,6 +76,8 @@ Then two lines on why it works, and *"use `lodash.debounce` if already installed
 </table>
 
 Not golfed, **boring**. Same behaviour, one less abstraction, no second file, and it names the dependency you might already have instead of reinventing it.
+
+<sub>From the June run, whose bare answer was recorded with Claude Code's tools on (3 turns, [#37](https://github.com/JayPokale/Chisle/issues/37)). With tools off this prompt is a tie or a loss for Chisle (99% and 123% of bare across two seeds); across all 14 tools-off coding cells Chisle's answers are 52% as long ([raw cells](benchmarks/results/raw-oct-notools/)).</sub>
 
 ## What it compresses
 
@@ -144,34 +146,27 @@ Upgrading, per-agent setup, `--stats` and config: [docs/usage.md](docs/usage.md)
 
 ## Benchmarks
 
-Claude Code 2.1.285 on Haiku 4.5, 13 live prompts × 2 seeds = 26 cells per arm, billed output tokens vs the same model with no ruleset ([writeup + raw cells](benchmarks/results/2026-10-01-live-rerun.md)):
+Claude Code 2.1.285 on Haiku 4.5, 13 live prompts × 2 seeds = 26 cells per arm, tools off, billed output tokens vs the same model with no ruleset ([writeup + raw cells](benchmarks/results/2026-10-12-tools-off-rerun.md)). This replaces the 2026-10-01 run, which left Claude Code's tools on ([#37](https://github.com/JayPokale/Chisle/issues/37)):
 
 <p align="center">
-  <img src="assets/benchmark-rerun.svg" width="820" alt="2026-10-01 live rerun: total billed output as percent of the bare model. caveman 102%, ponytail 105%, Chisle 83%.">
+  <img src="assets/benchmark-rerun.svg" width="820" alt="2026-10-12 tools-off rerun: total billed output as percent of the bare model. caveman 81%, ponytail 127%, Chisle 82%.">
 </p>
 
 | | total bill | 95% CI | visible answer | worst cell | backfires |
 |---|--:|--:|--:|--:|--:|
-| caveman | 102% | 79–128% | 105% | 305% | 15 / 26 |
-| ponytail | 105% | 86–129% | 97% | 493% | 16 / 26 |
-| **Chisle** | **83%** | **69–95%** | **76%** | **170%** | **11 / 26** |
+| caveman | 81% | 63–105% | 65% | 339% | 13 / 26 |
+| ponytail | 127% | 102–155% | 58% | 493% | 18 / 26 |
+| **Chisle** | **82%** | **67–104%** | **56%** | **194%** | **12 / 26** |
 
-Chisle is the only arm below a bare model. It pays on long answers (77%) and coding prompts (76%); on short answers it breaks even (106%).
+All three shorten the visible answer by a similar amount; the intervals overlap. On the bill Chisle and caveman tie, and neither is clearly below a bare model. ponytail bills more because its reasoning grows almost 5×. Every ruleset costs more than none on short answers.
 
-On Pi + GPT-5.5 Chisle again gives the shortest answers, 37% the length of a bare model's (caveman 56%, ponytail 49%), though on total billed tokens ponytail edges it, 59% to 61%:
+On Pi + GPT-5.5 Chisle gives the shortest answers, 37% the length of a bare model's (caveman 56%, ponytail 49%), though on total billed tokens ponytail edges it, 59% to 61%:
 
 <p align="center">
   <img src="assets/benchmark-pi.svg" width="820" alt="Pi benchmark, 6 tasks on GPT-5.5, as percent of the same model with no ruleset. Answer length: caveman 56%, ponytail 49%, Chisle 37%. Billed tokens: caveman 72%, ponytail 59%, Chisle 61%.">
 </p>
 
 **Input side:** tool output is 67.5% of context in 171 measured Claude Code sessions, and it is re-billed on every later request. The compressor cut ~46% off every eligible output there, and 27.4% of tool output on top of Pi's own truncation ([receipts](benchmarks/results/2026-07-07-input-axis.md)).
-
-|  | prose | code judgment | input/context | worst-case guard | publishes failures |
-|---|:---:|:---:|:---:|:---:|:---:|
-| caveman | ✅ | ❌ | ❌ | ❌ 305% | ❌ |
-| ponytail | ❌ | ✅ | ❌ | ❌ 493% | ❌ |
-| headroom | ❌ | ❌ | ✅ proxy | n/a | ❌ |
-| **Chisle** | ✅ | ✅ | ✅ hook | **170%** | ✅ |
 
 Every table, chart and caveat, including the June suite and the Pi run in full: [docs/benchmarks.md](docs/benchmarks.md). Head to head: [docs/comparison.md](docs/comparison.md).
 
@@ -247,6 +242,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Built by [Jay Pokale](https://github.com
 ## License
 
 [MIT](LICENSE). The shortest license that works.
+
+Chisle began as a merge of [caveman](https://github.com/JuliusBrussee/caveman) (terse prose) and [ponytail](https://github.com/DietrichGebert/ponytail) (lazy-senior-dev code rules), and its ruleset still carries parts of both. Their MIT notices are in [LICENSE](LICENSE).
 
 ## Contributors
 

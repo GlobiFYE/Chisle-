@@ -10,9 +10,12 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 - **Spill, dedup and stats writes are symlink-safe and atomic** for every agent sharing the compressor core. Subdirectories Chisle creates and the files it writes must not be links; a symlinked state root (e.g. dotfiles via GNU stow) is still accepted. (#33)
 - **Error lines inside underscore codes survive compression.** `FATAL_MEMORY_PROBE: …`, `APP_ERROR_CODE: …` and `npm ERR! …` in an elided middle were dropped because `\b` treats `_` as a word character and finds no boundary after `ERR!`. Severity words now match on letter/digit boundaries; words like `fatalistic` or `terror` still don't. (#38)
 - **`npm test` no longer uninstalls live integrations.** The standalone Claude test ran `--uninstall` without `--only claude` and with the real `PATH`, so it stripped OpenCode and other hosts and could run `claude plugin uninstall` on the real install. It is now scoped, with an empty `PATH` and a temporary `HOME`. (#39)
+- **Benchmark headline withdrawn and re-measured.** `run-live.sh` never turned Claude Code's tools off, so in 14 of 26 prompts an arm tried `Write`/`Bash`, was denied and wrote the code again, double-counting it. It now passes `--tools "" --strict-mcp-config`. With tools off (2026-10-12, same prompts and versions) the three rulesets shorten answers by a similar amount (Chisle 56%, ponytail 58%, caveman 65%), Chisle and caveman tie on the bill (82%, 81%), and ponytail bills 127%. The "33% shorter and 24% cheaper, while caveman and ponytail make them longer" claim is gone from the README, docs and site. (#37)
+- **ponytail in the agentic benchmark.** `benchmarks/agentic/run.js` gains a `ponytail` arm. On the six fixtures (6 seeds) ponytail passed 32/36 hidden tests against 28/36 for both vanilla and Chisle (p = 0.34, not separable from noise), at +14% cost per run. (#37)
 
 ### Docs
 - Failed OpenCode Bash calls verified live on OpenCode 1.18.31: they reach `tool.execute.after` and are compressed with exit metadata intact. (#29, #33)
+- **Credit caveman and ponytail.** Chisle's ruleset began as a merge of both MIT-licensed skills; their copyright notices are now in `LICENSE` and the README names them. (#37)
 
 ## [3.7.0] - 2026-10-04
 

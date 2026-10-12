@@ -22,10 +22,10 @@ const RAW_DIRS = [
   path.join(ROOT, 'benchmarks', 'results', 'raw-verify'),
 ];
 const RERUN_RAW_DIRS = [
-  path.join(ROOT, 'benchmarks', 'results', 'raw-oct', 'default-s1'),
-  path.join(ROOT, 'benchmarks', 'results', 'raw-oct', 'default-s2'),
-  path.join(ROOT, 'benchmarks', 'results', 'raw-oct', 'large-s1'),
-  path.join(ROOT, 'benchmarks', 'results', 'raw-oct', 'large-s2'),
+  path.join(ROOT, 'benchmarks', 'results', 'raw-oct-notools', 'default-s1'),
+  path.join(ROOT, 'benchmarks', 'results', 'raw-oct-notools', 'default-s2'),
+  path.join(ROOT, 'benchmarks', 'results', 'raw-oct-notools', 'large-s1'),
+  path.join(ROOT, 'benchmarks', 'results', 'raw-oct-notools', 'large-s2'),
 ];
 const PI_RAW_DIR = path.join(ROOT, 'benchmarks', 'results', 'raw-pi');
 const SVG_OUT = path.join(ROOT, 'assets', 'benchmark.svg');
@@ -211,7 +211,7 @@ function collectPi() {
   return stat;
 }
 
-// Claude Code coding prompts from the October re-run (raw-oct/): visible answer
+// Claude Code coding prompts from the October tools-off re-run (raw-oct-notools/): visible answer
 // (billed minus reasoning, as the writeup defines it) and billed output, paired
 // per cell against vanilla, as % of vanilla.
 function collectClaudeCoding() {
@@ -306,13 +306,13 @@ function buildRerunSvg(stat, taskCount) {
   });
 
   const aria =
-    '2026-10-01 live rerun: total billed output as percent of the bare model. ' +
+    '2026-10-12 tools-off rerun: total billed output as percent of the bare model. ' +
     ARMS.map(a => `${a.label} ${stat[a.key].total}%`).join(', ') +
     '.';
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${aria}">
 <rect width="${W}" height="${H}" rx="10" fill="#0d1117"/>
-<text x="${W / 2}" y="34" font-size="17" font-weight="700" fill="#c9d1d9" text-anchor="middle">2026-10-01 live re-run — % of a bare model</text>
+<text x="${W / 2}" y="34" font-size="17" font-weight="700" fill="#c9d1d9" text-anchor="middle">2026-10-12 re-run, tools off — % of a bare model</text>
 <text x="${W / 2}" y="54" font-size="11.5" fill="#8b949e" text-anchor="middle">total billed output across ${taskCount} cells per arm; lower = cheaper</text>
 ${body}</svg>
 `;
