@@ -142,6 +142,14 @@ function scanPi(lines) {
       // Stored Pi content is already capped at 50KB/2000 lines. Savings here
       // are marginal over that native truncation. Dedup stays excluded because
       // JSONL source order cannot reconstruct parallel tool completion order.
+      // Failed results count too, unlike the Claude path (#23). In Pi 0.85.1 a
+      // non-zero bash exit throws with the full output (coding-agent
+      // src/core/tools/bash.ts:365); the loop turns the throw into an error
+      // result and still runs afterToolCall (agent src/agent-loop.ts:708-733),
+      // which emits tool_result with isError: true and applies the returned
+      // content (coding-agent src/core/agent-session.ts:508). Only calls failed
+      // before execution (unknown tool, bad args, blocked) skip the hook; those
+      // are short error strings, below any compression threshold.
       account(message.toolName || '?', extractText(message.content), {}, false);
     } else {
       sessionChars += contentChars(message.content);
