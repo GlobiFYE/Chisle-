@@ -157,22 +157,26 @@ test('Pi install, dry-run, and uninstall delegate settings changes to Pi', { ski
 
 test('standalone Claude hook wiring merges + uninstalls cleanly', () => {
   // Drive the standalone path by pointing --config-dir at a temp dir and using
-  // --only claude. The claude CLI is likely present, so the plugin path may run;
-  // either way the settings.json must remain valid JSON and uninstall must clean.
+  // --only claude. Uninstall must stay scoped (#39): without --only it removes
+  // every host's integration, and with a real `claude` on PATH it would run
+  // `claude plugin uninstall` against the live install. So: empty PATH, temp HOME.
   const cfg = fs.mkdtempSync(path.join(os.tmpdir(), 'chisle-cfg-'));
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'chisle-home-'));
+  const emptyBin = fs.mkdtempSync(path.join(os.tmpdir(), 'chisle-nopath-'));
+  const env = { HOME: home, USERPROFILE: home, PATH: emptyBin };
   // Pre-seed a user settings.json with foreign content to protect.
   fs.writeFileSync(path.join(cfg, 'settings.json'), JSON.stringify({ model: 'opus' }, null, 2));
 
-  runCLI(['--only', 'claude', '--config-dir', cfg, '--dry-run']);
+  runCLI(['--only', 'claude', '--config-dir', cfg, '--dry-run'], { env });
   // Dry-run must not have altered the seeded file.
   assert.deepEqual(JSON.parse(fs.readFileSync(path.join(cfg, 'settings.json'), 'utf8')), { model: 'opus' });
 
   // Uninstall against the same dir must not corrupt the foreign settings.
-  runCLI(['--uninstall', '--config-dir', cfg]);
+  runCLI(['--uninstall', '--only', 'claude', '--config-dir', cfg], { env });
   const after = JSON.parse(fs.readFileSync(path.join(cfg, 'settings.json'), 'utf8'));
   assert.equal(after.model, 'opus', 'foreign settings preserved through uninstall');
 
-  fs.rmSync(cfg, { recursive: true, force: true });
+  for (const d of [cfg, home, emptyBin]) fs.rmSync(d, { recursive: true, force: true });
 });
 
 // Regression for #4: the plugin path and the standalone path both registering
@@ -358,6 +362,10 @@ test('--help advertises --update', () => {
 
 function mkHome() { return fs.mkdtempSync(path.join(os.tmpdir(), 'chisle-home-')); }
 
+function isolatedOpencodeEnv(home, extra) {
+  return { CHISLE_HOME: home, XDG_CONFIG_HOME: '', OPENCODE_CONFIG_DIR: '', ...extra };
+}
+
 function repoSkill(rel) { return fs.readFileSync(path.join(__dirname, '..', 'skills', rel), 'utf8'); }
 
 test('--help and --list advertise opencode + hermes', () => {
@@ -369,7 +377,7 @@ test('--help and --list advertise opencode + hermes', () => {
 
 test('opencode install appends fenced ruleset, preserves user content, copies skills', () => {
   const home = mkHome();
-  const env = { CHISLE_HOME: home };
+  const env = isolatedOpencodeEnv(home);
   const agents = path.join(home, '.config', 'opencode', 'AGENTS.md');
   const skills = path.join(home, '.config', 'opencode', 'skills');
   fs.mkdirSync(path.dirname(agents), { recursive: true });
@@ -426,6 +434,61 @@ test('opencode install appends fenced ruleset, preserves user content, copies sk
   fs.rmSync(home, { recursive: true, force: true });
 });
 
+for (const [name, extra, expected] of [
+  ['XDG_CONFIG_HOME', home => ({ XDG_CONFIG_HOME: path.join(home, 'xdg') }), home => path.join(home, 'xdg', 'opencode')],
+  ['OPENCODE_CONFIG_DIR', home => ({ XDG_CONFIG_HOME: path.join(home, 'ignored'), OPENCODE_CONFIG_DIR: path.join(home, 'custom') }), home => path.join(home, 'custom')],
+]) {
+  test(`OpenCode install, update, stats, and uninstall share ${name}`, () => {
+    const home = mkHome();
+    const root = expected(home);
+    const env = isolatedOpencodeEnv(home, extra(home));
+    try {
+      let r = runCLI(['--only', 'opencode'], { env });
+      assert.equal(r.status, 0, r.out);
+      const agents = path.join(root, 'AGENTS.md');
+      assert.match(fs.readFileSync(agents, 'utf8'), /chisle-begin/);
+      assert.ok(fs.existsSync(path.join(root, 'plugins', 'chisle.js')));
+
+      fs.writeFileSync(agents, fs.readFileSync(agents, 'utf8').replace(/# Chisle[\s\S]*<!-- chisle-end -->/, 'STALE\n<!-- chisle-end -->'));
+      r = runCLI(['--only', 'opencode', '--update'], { env });
+      assert.equal(r.status, 0, r.out);
+      assert.doesNotMatch(fs.readFileSync(agents, 'utf8'), /STALE/);
+
+      fs.writeFileSync(path.join(root, '.chisle-compress-stats.json'), JSON.stringify({ savedChars: 1234, events: 2 }));
+      r = runCLI(['--stats', '--only', 'opencode'], { env });
+      assert.match(r.out, /1,234 chars/);
+      fs.mkdirSync(path.join(root, 'chisle-spill'));
+      fs.mkdirSync(path.join(root, 'chisle-dedup'));
+
+      r = runCLI(['--uninstall', '--only', 'opencode'], { env });
+      assert.equal(r.status, 0, r.out);
+      assert.doesNotMatch(fs.readFileSync(agents, 'utf8'), /chisle-begin/);
+      assert.equal(fs.existsSync(path.join(root, 'plugins', 'chisle.js')), false);
+      assert.equal(fs.existsSync(path.join(root, 'chisle-spill')), false);
+      assert.equal(fs.existsSync(path.join(root, 'chisle-dedup')), false);
+      assert.equal(fs.existsSync(path.join(root, '.chisle-compress-stats.json')), false);
+    } finally {
+      fs.rmSync(home, { recursive: true, force: true });
+    }
+  });
+}
+
+test('OpenCode directory detection uses the configured root', { skip: process.platform === 'win32' }, () => {
+  const home = mkHome();
+  const emptyPath = fs.mkdtempSync(path.join(os.tmpdir(), 'chisle-empty-path-'));
+  const root = path.join(home, 'custom');
+  fs.mkdirSync(root);
+  try {
+    const r = runCLI(['--list'], {
+      env: isolatedOpencodeEnv(home, { OPENCODE_CONFIG_DIR: root, PATH: emptyPath }),
+    });
+    assert.match(r.out, /✓ OpenCode/);
+  } finally {
+    fs.rmSync(home, { recursive: true, force: true });
+    fs.rmSync(emptyPath, { recursive: true, force: true });
+  }
+});
+
 test('hermes install copies skills verbatim, uninstall prunes only owned', () => {
   const home = mkHome();
   const env = { CHISLE_HOME: home };
@@ -449,7 +512,7 @@ test('hermes install copies skills verbatim, uninstall prunes only owned', () =>
 
 test('opencode+hermes dry-run changes nothing on disk', () => {
   const home = mkHome();
-  const env = { CHISLE_HOME: home };
+  const env = isolatedOpencodeEnv(home);
   runCLI(['--only', 'opencode', '--only', 'hermes', '--dry-run'], { env });
   assert.deepEqual(fs.readdirSync(home), [], 'dry-run wrote into CHISLE_HOME');
   fs.rmSync(home, { recursive: true, force: true });
@@ -461,7 +524,7 @@ test('a fence missing its end marker is left alone, not truncated', () => {
   // uninstall must refuse. Slicing to the end marker unconditionally would eat
   // the rest of the user's global instructions.
   const home = fs.mkdtempSync(path.join(os.tmpdir(), 'chisle-fence-'));
-  const env = { CHISLE_HOME: home };
+  const env = isolatedOpencodeEnv(home);
   const body = 'my rules\n\n<!-- chisle-begin -->\nstale\n\nKEEP THIS\n';
 
   for (const [id, rel] of [['codex', ['.codex', 'AGENTS.md']], ['opencode', ['.config', 'opencode', 'AGENTS.md']]]) {
