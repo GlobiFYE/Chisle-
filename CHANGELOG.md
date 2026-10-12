@@ -5,6 +5,13 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+- **Benchmark headline withdrawn and re-measured.** `run-live.sh` never turned Claude Code's tools off, so in 14 of 26 prompts an arm tried `Write`/`Bash`, was denied and wrote the code again, double-counting it. It now passes `--tools "" --strict-mcp-config`. With tools off (2026-10-12, same prompts and versions) the three rulesets shorten answers by a similar amount (Chisle 56%, ponytail 58%, caveman 65%), Chisle and caveman tie on the bill (82%, 81%), and ponytail bills 127%. The "33% shorter and 24% cheaper, while caveman and ponytail make them longer" claim is gone from the README, docs and site. (#37)
+- **ponytail in the agentic benchmark.** `benchmarks/agentic/run.js` gains a `ponytail` arm. On the six fixtures (6 seeds) ponytail passed 32/36 hidden tests against 28/36 for both vanilla and Chisle (p = 0.34, not separable from noise), at +14% cost per run. (#37)
+
+### Docs
+- **Credit caveman and ponytail.** Chisle's ruleset began as a merge of both MIT-licensed skills; their copyright notices are now in `LICENSE` and the README names them. (#37)
+
 ## [3.7.0] - 2026-10-04
 
 Minor: a new agent. Also ships the contributor benchmark work merged since 3.6.1.

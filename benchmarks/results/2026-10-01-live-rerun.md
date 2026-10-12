@@ -1,5 +1,9 @@
 # 2026-10-01 — Live re-run: the headline, re-measured
 
+> **Superseded by [2026-10-12](./2026-10-12-tools-off-rerun.md).** This run left
+> Claude Code's tools on; in 14 of 26 prompts an arm tried `Write`/`Bash`, was
+> denied, and wrote the code again (#37). Its numbers below are not valid.
+
 The published headline (Chisle 52% of a bare model's 20-task bill) came from
 June–July cells. Two problems surfaced while trimming the ruleset:
 

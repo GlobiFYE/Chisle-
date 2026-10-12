@@ -116,7 +116,10 @@ run_cell() {
       && mv -f "$tmp" "$out" \
       || { rm -f "$tmp"; echo "    (call failed for $task_id/$arm)"; }
   else
-    local args=(-p "$prompt" --model "$MODEL" --output-format json)
+    # No tools, matching Pi's --no-tools (#37). Without this the model tried
+    # Write/Bash, was denied, then re-emitted the code: answers counted twice.
+    # --strict-mcp-config also drops account-level MCP connectors.
+    local args=(-p "$prompt" --model "$MODEL" --output-format json --tools "" --strict-mcp-config)
     [ "$arm" != "vanilla" ] && args+=(--append-system-prompt-file "$ISO/${arm}.txt")
     # </dev/null is critical: otherwise the CLI consumes the task heredoc.
     ( cd /tmp && run_timed env HOME=/tmp CLAUDE_CONFIG_DIR="$ISO" claude "${args[@]}" </dev/null ) > "$tmp" 2>/dev/null \

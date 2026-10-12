@@ -6,13 +6,13 @@ import Reveal from "./Reveal";
 import SectionHead from "./SectionHead";
 import samples from "@/data/samples.json";
 
-// From benchmarks/results/2026-10-01-live-rerun.md: 13 live prompts x 2 seeds,
-// billed output tokens, shipped ruleset, current harness and rival versions.
+// From benchmarks/results/2026-10-12-tools-off-rerun.md: 13 live prompts x 2
+// seeds, billed output tokens, tools off, shipped ruleset and rival versions.
 const ARMS = [
-  { name: "chisle", pct: 83, self: true, note: "worst cell 170%" },
+  { name: "caveman", pct: 81, note: "worst cell 339%" },
+  { name: "chisle", pct: 82, self: true, note: "worst cell 194%" },
   { name: "bare model", pct: 100, note: "baseline" },
-  { name: "caveman", pct: 102, note: "worst cell 305%" },
-  { name: "ponytail", pct: 105, note: "worst cell 493%" },
+  { name: "ponytail", pct: 127, note: "worst cell 493%" },
 ];
 const MAX_PCT = Math.max(...ARMS.map((a) => a.pct));
 
@@ -92,10 +92,11 @@ export default function Benchmarks() {
 
         <Reveal delay={0.1}>
           <p className="mt-8 text-xs text-dim">
-            95% interval for Chisle&apos;s total: 69–95%; neither rival&apos;s clears 100%. Average
-            cell: 93% vs 113% (caveman) and 124% (ponytail). A single cell says little: the bare
-            model beats itself on 13 of 26 cells between seeds. Both rivals are credited in the
-            repo&apos;s prior-art table.
+            95% intervals: Chisle 67–104%, caveman 63–105%, ponytail 102–155%. Chisle and caveman
+            tie, and neither is clearly below a bare model; ponytail&apos;s answers are short but
+            its reasoning grows almost 5×. A single cell says little: the bare model beats itself
+            on 13 of 26 cells between seeds. Chisle began as a merge of caveman and ponytail; their
+            MIT notices are in the repo&apos;s LICENSE.
           </p>
         </Reveal>
 

@@ -57,6 +57,25 @@ log itself? The results below predate it and cover five fixtures.
 | context tokens | the context diet: input + cache read + cache creation, i.e. everything the run pulled into the window |
 | $ / run | the two above, priced |
 
+## Results, 2026-10-12: ponytail arm added (#37)
+
+`ARMS=ponytail RAW_DIR=benchmarks/agentic/raw-oct`, the same six fixtures x 6
+seeds, Haiku 4.5, Claude Code 2.1.285, ponytail 4.8.3 (installed plugin cache).
+Its cells sit beside the 2026-10-01 vanilla and Chisle cells below; same model
+and CLI version, run 11 days later. Score all three with
+`ARMS=vanilla,chisle,ponytail RAW_DIR=benchmarks/agentic/raw-oct node benchmarks/agentic/score.js`.
+
+| arm | n | passed | net LOC | out tokens | context tokens | turns | $ / run |
+|-----|--:|-------:|--------:|-----------:|---------------:|------:|--------:|
+| vanilla | 36 | 28 | 2.8 | 1118 | 115,063 | 5.42 | 0.0397 |
+| chisle | 36 | 28 | 2.5 | 1155 | 133,974 | 5.92 | 0.0424 |
+| ponytail | 36 | 32 | 2.5 | 1206 | 137,185 | 6.00 | 0.0453 |
+
+ponytail passed the most hidden tests (32/36; `dupepaths` 3/6, `yagni` 5/6),
+but against vanilla p = 0.343 (Fisher exact), so 36 cells cannot separate it
+from noise. It also cost the most: +14% per run, against Chisle's +6.8%.
+Neither ruleset made a loop run cheaper than no ruleset.
+
 ## Results, 2026-10-01 (trimmed ruleset, six fixtures)
 
 `ARMS=vanilla,chisle RAW_DIR=benchmarks/agentic/raw-oct`, 6 fixtures x 6 seeds,

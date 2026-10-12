@@ -4,25 +4,30 @@ Every result behind the [README](../README.md) headline, in full.
 
 Nothing here is estimated. Every figure below is recomputed from committed raw data; the 2026-07-07 [verification writeup](../benchmarks/results/2026-07-07-verify-rerun.md) re-derived the old claims from scratch, re-ran the whole suite against the competitors' **installed plugins**, and retired the one claim that didn't survive.
 
-## Output axis, re-measured 2026-10-01 (current)
+## Output axis, re-measured 2026-10-12 with tools off (current)
 
-Re-run with the shipped ruleset, Claude Code 2.1.285 and the rivals' current plugins (caveman `ef6050c5e184`, ponytail 4.8.3): 13 live prompts × 2 seeds = 26 cells per arm on Haiku 4.5, billed output tokens vs the no-tool baseline ([writeup + raw cells](../benchmarks/results/2026-10-01-live-rerun.md)):
+Claude Code 2.1.285, caveman `ef6050c5e184`, ponytail 4.8.3: 13 live prompts × 2 seeds = 26 single-turn cells per arm on Haiku 4.5, billed output tokens vs the no-tool baseline ([writeup + raw cells](../benchmarks/results/2026-10-12-tools-off-rerun.md)). The 2026-10-01 run of the same prompts left Claude Code's tools on: in 14 of 26 prompts an arm tried `Write`/`Bash`, was denied and wrote the code again, so it is withdrawn ([#37](https://github.com/JayPokale/Chisle/issues/37), [old writeup](../benchmarks/results/2026-10-01-live-rerun.md)).
 
 <p align="center">
-  <img src="../assets/benchmark-rerun.svg" width="820" alt="2026-10-01 live rerun: total billed output as percent of the bare model. caveman 102%, ponytail 105%, Chisle 83%.">
+  <img src="../assets/benchmark-rerun.svg" width="820" alt="2026-10-12 tools-off rerun: total billed output as percent of the bare model. caveman 81%, ponytail 127%, Chisle 82%.">
 </p>
 
 | | total bill | 95% CI | visible answer | worst cell | backfires |
 |---|--:|--:|--:|--:|--:|
-| caveman | 102% | 79–128% | 105% | 305% | 15 / 26 |
-| ponytail | 105% | 86–129% | 97% | 493% | 16 / 26 |
-| **Chisle** | **83%** | **69–95%** | **76%** | **170%** | **11 / 26** |
+| caveman | 81% | 63–105% | 65% | 339% | 13 / 26 |
+| ponytail | 127% | 102–155% | 58% | 493% | 18 / 26 |
+| **Chisle** | **82%** | **67–104%** | **56%** | **194%** | **12 / 26** |
 
-Chisle is the only arm measurably below a bare model, by about a third of what the June table below claimed. It pays on long answers (77%) and coding prompts (76%); on short answers it breaks even (106%), on explanation prompts ponytail is leaner (86% vs 91%), and reasoning tokens are not cut (107%). Single cells swing hard between seeds (57% → 135% on one prompt), and the bare model "backfires" against itself on 13 of 26 cells, so read totals, not backfire counts ([control](../benchmarks/results/2026-10-01-backfires.md)).
+All three shorten the visible answer by a similar amount (56–65%, overlapping intervals); on coding prompts ponytail's answers are the shortest (47%, Chisle 52%, caveman 57%). On the bill Chisle and caveman tie (82%, 81%) and neither interval excludes 100%. ponytail bills 127% because its reasoning grows almost 5×. Every ruleset raises reasoning (164–483%) and costs more than none on short answers. Single cells swing hard between seeds (57% → 135% on one prompt), and the bare model "backfires" against itself on 13 of 26 cells, so read totals, not backfire counts ([control](../benchmarks/results/2026-10-01-backfires.md)).
 
 **Why the June headline was retired.** Its 52% leaned on one cell: the June bare `cache` answer billed 4,910 tokens, while every later run of the same prompt billed 375–813. The ruleset also carried examples matching `cache` (from June 18) and `auth-bug` (from June 27), so four cells may have been primed; without them the June total was 70%. The tables below stay as what they were.
 
 ## Output axis, June–July 2026 (superseded): vs caveman & ponytail, 20 live tasks
+
+> **Caveat (2026-10-12):** the Claude Code harness left tools on until #37. In
+> the Haiku cells of this suite (`raw/`, `raw-verify/`) 10 of 24 cells per
+> directory took more than one turn, so those numbers carry the same
+> double-counting. The Sonnet cells (`raw-sonnet/`) are all single-turn.
 
 **What this suite measures, and what it does not.** Every figure below is *billed output tokens on single-turn prompts with no tools available*. That isolates the ruleset's effect on how the model writes, which is what it was built to measure. It is not whole-session cost: a real agentic session is dominated by tool output and cached input, so a tool can win here and still fail to pay for itself end to end. The input axis below is measured separately, and against its own baseline.
 
@@ -109,17 +114,6 @@ These prompts were never designed to test this, which is the real caveat. To pro
 ```bash
 SUITE=large bash benchmarks/run-live.sh <model> benchmarks/results/raw-large
 ```
-
-### Where each tool actually helps
-
-|  | prose | code judgment | input/context | worst-case guard | publishes failures |
-|---|:---:|:---:|:---:|:---:|:---:|
-| caveman | ✅ | ❌ | ❌ | ❌ 305% | ❌ |
-| ponytail | ❌ | ✅ | ❌ | ❌ 493% | ❌ |
-| headroom | ❌ | ❌ | ✅ proxy | n/a | ❌ |
-| **Chisle** | ✅ | ✅ | ✅ hook | **170%** | ✅ |
-
-The row that matters is the last one. Every tool here looks good on its best day; the numbers above are the only ones in this class published alongside the run that went wrong. [Full comparison →](comparison.md)
 
 ## Input axis: tool-output compression (Claude Code + Pi)
 

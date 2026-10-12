@@ -126,8 +126,8 @@ export default function Hero() {
             <p className="max-w-2xl text-base leading-relaxed text-fg/85 sm:text-lg">
               Built for Claude Code. One command, twelve agents.
               <br className="hidden sm:block" />{" "}
-              On coding prompts Claude&apos;s answers come back 33% shorter and 24% cheaper, while
-              caveman and ponytail make them longer. Receipts, losses included, in the repo.
+              On coding prompts Claude&apos;s answers come back about half as long. Receipts,
+              losses included, in the repo.
             </p>
           </motion.div>
 

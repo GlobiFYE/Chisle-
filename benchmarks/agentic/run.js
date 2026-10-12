@@ -7,7 +7,8 @@
 // sees the test: test.js is copied in AFTER the run and decides pass/fail.
 //
 // Usage: node benchmarks/agentic/run.js [model] [seeds] [parallel]
-//   ARMS=vanilla,chisle,chisle-hook  arms to run (default: vanilla,chisle)
+//   ARMS=vanilla,chisle,chisle-hook,ponytail  arms to run (default: vanilla,chisle)
+//   PONYTAIL_SKILL=path              ponytail SKILL.md (default: installed plugin cache)
 //   FIXTURES=noisylog,reuse          run only these fixtures (default: all)
 //   RAW_DIR=path                     where cells go (default: ./raw); use a fresh
 //                                    dir when the ruleset changes, or old cells
@@ -24,7 +25,7 @@ const MODEL = process.argv[2] || 'claude-haiku-4-5-20251001';
 const SEEDS = Number(process.argv[3] || 3);
 const PAR = Number(process.argv[4] || 5);
 
-const KNOWN_ARMS = ['vanilla', 'chisle', 'chisle-hook'];
+const KNOWN_ARMS = ['vanilla', 'chisle', 'chisle-hook', 'ponytail'];
 const ARMS = (process.env.ARMS || 'vanilla,chisle').split(',').map((a) => a.trim()).filter(Boolean);
 const unknown = ARMS.filter((a) => !KNOWN_ARMS.includes(a));
 if (unknown.length) { console.error(`unknown arm(s): ${unknown.join(', ')}; known: ${KNOWN_ARMS.join(', ')}`); process.exit(1); }
@@ -41,6 +42,19 @@ const skill = fs.readFileSync(path.join(HERE, '..', '..', 'skills', 'chisle', 'S
 const body = skill.split(/^---\s*$/m).slice(2).join('---').trim();
 if (!body) { console.error('empty chisle system prompt'); process.exit(1); }
 fs.writeFileSync(path.join(ISO, 'chisle.txt'), body + '\n');
+// ponytail arm (#37): the rival's skill body, appended the same way.
+if (ARMS.includes('ponytail')) {
+  const cache = path.join(os.homedir(), '.claude', 'plugins', 'cache', 'ponytail', 'ponytail');
+  let src = process.env.PONYTAIL_SKILL;
+  if (!src) {
+    try { src = fs.readdirSync(cache).map((v) => path.join(cache, v, 'skills', 'ponytail', 'SKILL.md')).find((f) => fs.existsSync(f)); } catch (_) {}
+  }
+  if (!src) { console.error('ponytail SKILL.md not found; set PONYTAIL_SKILL'); process.exit(1); }
+  const pt = fs.readFileSync(src, 'utf8').split(/^---\s*$/m).slice(2).join('---').trim();
+  if (!pt) { console.error('empty ponytail system prompt'); process.exit(1); }
+  fs.writeFileSync(path.join(ISO, 'ponytail.txt'), pt + '\n');
+  console.log('ponytail skill: ' + src);
+}
 process.on('exit', () => fs.rmSync(ISO, { recursive: true, force: true }));
 
 // chisle-hook arm: the ruleset plus the shipped PostToolUse compressor, taken
@@ -91,7 +105,7 @@ function runCell(c) {
 
     // stream-json, so each cell also records the tool calls it made, not only totals.
     const args = ['-p', task, '--model', MODEL, '--output-format', 'stream-json', '--verbose', '--dangerously-skip-permissions'];
-    if (c.arm !== 'vanilla') args.push('--append-system-prompt-file', path.join(ISO, 'chisle.txt'));
+    if (c.arm !== 'vanilla') args.push('--append-system-prompt-file', path.join(ISO, c.arm === 'ponytail' ? 'ponytail.txt' : 'chisle.txt'));
     let cfg = ISO;
     if (c.arm === 'chisle-hook') {
       // Own config dir per cell: the hook keeps its on/off flag, savings ledger
