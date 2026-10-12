@@ -22,6 +22,8 @@
 #   on longer answers; this suite exists to test that directly rather than
 #   inferring it from tasks that were not designed for the question.
 #   Example: SUITE=large bash benchmarks/run-live.sh <model> results/raw-large
+#   SUITE=sonnet re-runs the 2026-06-29 Sonnet cross-check (reconstructed prompts):
+#   SUITE=sonnet bash benchmarks/run-live.sh claude-sonnet-4-6 results/raw-sonnet-2
 set -uo pipefail
 
 HARNESS="${HARNESS:-claude}"
@@ -80,6 +82,23 @@ architecture	noncoding	Explain how you would migrate a monolith to services with
 EOF
 )
 
+# SUITE=sonnet: the 2026-06-29 Sonnet cross-check (results/raw-sonnet/). Its
+# prompts were never committed; these are RECONSTRUCTED from the recorded
+# answers (#28). Only `caching` is verbatim from the writeup. New cells are
+# comparable to each other, not to raw-sonnet/. Kinds match aggregate.js.
+TASKS_SONNET=$(cat <<'EOF'
+palindrome	coding	Reverse a string in Python. One-liner.
+deadlock	noncoding	What is a deadlock, and how do you prevent one?
+letconst	noncoding	What is the difference between let and const in JavaScript?
+caching	coding	Add caching to this Python function so repeated calls with the same user_id don't re-hit the DB: def get_user(user_id): return db.query_user(user_id)
+mixed	coding	Write a debounce function in JavaScript and explain when to use it.
+ratelimit	coding	Write a Python rate limiter that allows at most N requests per minute per user.
+retry	coding	Write a Python function that fetches JSON from a URL with requests, retrying failures with exponential backoff.
+signup	coding	Write a Python function that validates a signup form and returns a list of errors: email must look like an email, password at least 8 characters with a digit, username alphanumeric and 3-20 characters.
+thread	coding	Make this Python counter thread-safe: counter = 0; def increment(): global counter; counter += 1
+EOF
+)
+
 TASKS=$(cat <<'EOF'
 debounce	coding	Add debounce to a search input that currently fires an API call on every keystroke. Show the code.
 cache	coding	Add a cache layer for our user profile API responses. Show the code.
@@ -92,10 +111,12 @@ EOF
 
 # Pick the suite. Default stays byte-identical so previously committed cells
 # remain comparable; SUITE=large swaps in the long-answer prompts above.
-if [ "${SUITE:-default}" = "large" ]; then
-  TASKS="$TASKS_LARGE"
-  echo "suite: large (long-answer prompts)"
-fi
+case "${SUITE:-default}" in
+  default) ;;
+  large)  TASKS="$TASKS_LARGE";  echo "suite: large (long-answer prompts)" ;;
+  sonnet) TASKS="$TASKS_SONNET"; echo "suite: sonnet (reconstructed 2026-06-29 prompts)" ;;
+  *) echo "SUITE must be default, large or sonnet"; exit 2 ;;
+esac
 
 run_cell() {
   local arm="$1" task_id="$2" prompt="$3"

@@ -5,6 +5,13 @@ the question: is RDXmin genuinely better than caveman and ponytail, or just a
 compromise? Raw cells: [`raw-sonnet/`](./raw-sonnet/). Same isolation rig as
 `run-live.sh` (only the injected system prompt varies).
 
+> **Prompts (added 2026-10-12, #28):** the original prompts were never
+> committed. `SUITE=sonnet` in [`run-live.sh`](../run-live.sh) carries a
+> reconstruction from the recorded answers; only `caching` (quoted below) is
+> verbatim. Re-run with
+> `SUITE=sonnet bash benchmarks/run-live.sh claude-sonnet-4-6 <fresh-dir>` and
+> compare the new cells with each other, not with `raw-sonnet/`.
+
 ## 1. Small prose prompts — caveman's home turf
 
 Billed output tokens, % of vanilla baseline (lower = leaner):
