@@ -5,6 +5,10 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+- **Error lines inside underscore codes survive compression.** `FATAL_MEMORY_PROBE: …`, `APP_ERROR_CODE: …` and `npm ERR! …` in an elided middle were dropped because `\b` treats `_` as a word character and finds no boundary after `ERR!`. Severity words now match on letter/digit boundaries; words like `fatalistic` or `terror` still don't. (#38)
+- **`npm test` no longer uninstalls live integrations.** The standalone Claude test ran `--uninstall` without `--only claude` and with the real `PATH`, so it stripped OpenCode and other hosts and could run `claude plugin uninstall` on the real install. It is now scoped, with an empty `PATH` and a temporary `HOME`. (#39)
+
 ## [3.7.0] - 2026-10-04
 
 Minor: a new agent. Also ships the contributor benchmark work merged since 3.6.1.

@@ -157,22 +157,26 @@ test('Pi install, dry-run, and uninstall delegate settings changes to Pi', { ski
 
 test('standalone Claude hook wiring merges + uninstalls cleanly', () => {
   // Drive the standalone path by pointing --config-dir at a temp dir and using
-  // --only claude. The claude CLI is likely present, so the plugin path may run;
-  // either way the settings.json must remain valid JSON and uninstall must clean.
+  // --only claude. Uninstall must stay scoped (#39): without --only it removes
+  // every host's integration, and with a real `claude` on PATH it would run
+  // `claude plugin uninstall` against the live install. So: empty PATH, temp HOME.
   const cfg = fs.mkdtempSync(path.join(os.tmpdir(), 'chisle-cfg-'));
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'chisle-home-'));
+  const emptyBin = fs.mkdtempSync(path.join(os.tmpdir(), 'chisle-nopath-'));
+  const env = { HOME: home, USERPROFILE: home, PATH: emptyBin };
   // Pre-seed a user settings.json with foreign content to protect.
   fs.writeFileSync(path.join(cfg, 'settings.json'), JSON.stringify({ model: 'opus' }, null, 2));
 
-  runCLI(['--only', 'claude', '--config-dir', cfg, '--dry-run']);
+  runCLI(['--only', 'claude', '--config-dir', cfg, '--dry-run'], { env });
   // Dry-run must not have altered the seeded file.
   assert.deepEqual(JSON.parse(fs.readFileSync(path.join(cfg, 'settings.json'), 'utf8')), { model: 'opus' });
 
   // Uninstall against the same dir must not corrupt the foreign settings.
-  runCLI(['--uninstall', '--config-dir', cfg]);
+  runCLI(['--uninstall', '--only', 'claude', '--config-dir', cfg], { env });
   const after = JSON.parse(fs.readFileSync(path.join(cfg, 'settings.json'), 'utf8'));
   assert.equal(after.model, 'opus', 'foreign settings preserved through uninstall');
 
-  fs.rmSync(cfg, { recursive: true, force: true });
+  for (const d of [cfg, home, emptyBin]) fs.rmSync(d, { recursive: true, force: true });
 });
 
 // Regression for #4: the plugin path and the standalone path both registering
