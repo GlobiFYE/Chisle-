@@ -143,6 +143,16 @@ test('compressForOpencode salvages error lines from the elided middle', () => {
   assert.match(out, /ERROR: the one line that mattered/);
 });
 
+test('salvage matches severities inside underscore codes and ERR!, not inside words (#38)', () => {
+  const keep = ['FATAL_MEMORY_PROBE: id-1', 'APP_ERROR_CODE: id-2', 'WARNING_LIMIT: id-3', 'npm ERR! code E404', 'ERR!attached'];
+  const drop = ['fatalistic outlook', 'terror level', 'warningly said'];
+  const lines = Array.from({ length: 450 }, (_, i) => `build ${i} ${'x'.repeat(70)}`);
+  [...keep, ...drop].forEach((l, i) => lines.splice(200 + i * 5, 0, l));
+  const out = compressForOpencode('bash', lines.join('\n'), { mode: 'on' });
+  for (const l of keep) assert.ok(out.includes(l), 'dropped: ' + l);
+  for (const l of drop) assert.ok(!out.includes(l), 'salvaged: ' + l);
+});
+
 test('maxChars is a final bound for long lines with late errors', () => {
   const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chisle-oc-bound-'));
   process.env.CHISLE_COMPRESS_MAX_CHARS = '4000';

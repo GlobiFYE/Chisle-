@@ -84,7 +84,10 @@ const SAFE_TOOLS_COPILOT = ['bash', 'powershell', 'grep', 'glob', 'web_fetch', '
 // NEVER_COMPRESS above — not merely absent from the allowlist.
 const NEVER_COMPRESS_COPILOT = ['view', 'create', 'edit', 'str_replace', 'insert'];
 
-const SALVAGE_RE = /\b(error|err!|fail(ed|ure|ing)?|exception|traceback|panic|fatal|denied|refused|timed?[ _-]?out|assert(ion)?|segfault|npe|undefined reference|cannot find|not found|warning)\b/i;
+// Letter/digit boundaries, not \b: `_` is a word char, so \b missed severities
+// inside codes like FATAL_MEMORY_PROBE / APP_ERROR_CODE (#38), and `err!` then
+// a space has no trailing \b at all.
+const SALVAGE_RE = /(?<![A-Za-z0-9])(?:err!|(?:error|fail(ed|ure|ing)?|exception|traceback|panic|fatal|denied|refused|timed?[ _-]?out|assert(ion)?|segfault|npe|undefined reference|cannot find|not found|warning)(?![A-Za-z0-9]))/i;
 const MAX_SALVAGED = 12;      // error lines rescued from the elided middle
 const MAX_SALVAGE_LINE = 300; // per-line char cap on salvaged lines
 

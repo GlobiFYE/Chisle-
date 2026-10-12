@@ -8,6 +8,8 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 ### Fixed
 - **OpenCode install follows OpenCode's config root.** Install, detection, update, uninstall, plugin state and `--stats --only opencode` now resolve `OPENCODE_CONFIG_DIR`, then `$XDG_CONFIG_HOME/opencode`, then `~/.config/opencode`. Previously the installer always wrote `~/.config/opencode` while the plugin honored `XDG_CONFIG_HOME`. (#33)
 - **Spill, dedup and stats writes are symlink-safe and atomic** for every agent sharing the compressor core. Subdirectories Chisle creates and the files it writes must not be links; a symlinked state root (e.g. dotfiles via GNU stow) is still accepted. (#33)
+- **Error lines inside underscore codes survive compression.** `FATAL_MEMORY_PROBE: …`, `APP_ERROR_CODE: …` and `npm ERR! …` in an elided middle were dropped because `\b` treats `_` as a word character and finds no boundary after `ERR!`. Severity words now match on letter/digit boundaries; words like `fatalistic` or `terror` still don't. (#38)
+- **`npm test` no longer uninstalls live integrations.** The standalone Claude test ran `--uninstall` without `--only claude` and with the real `PATH`, so it stripped OpenCode and other hosts and could run `claude plugin uninstall` on the real install. It is now scoped, with an empty `PATH` and a temporary `HOME`. (#39)
 
 ### Docs
 - Failed OpenCode Bash calls verified live on OpenCode 1.18.31: they reach `tool.execute.after` and are compressed with exit metadata intact. (#29, #33)
