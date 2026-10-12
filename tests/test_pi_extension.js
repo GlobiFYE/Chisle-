@@ -87,6 +87,21 @@ test('compresses safe Pi tool text and patches content only', async () => {
   assert.match(h.statuses.at(-1)[1], /⇣/);
 });
 
+// #23: Pi 0.85.1 delivers a failed bash call (non-zero exit) to tool_result
+// with isError: true and applies the returned content, so it is compressed
+// like any other result. Returning only `content` keeps Pi's isError intact.
+test('compresses a failed Pi tool result and leaves isError to Pi', async () => {
+  process.env.CHISLE_DEFAULT_MODE = 'on';
+  const h = makeHarness();
+  await start(h);
+  const text = bigOutput() + '\n\nCommand exited with code 23';
+  const result = await h.handlers.get('tool_result')(toolEvent('bash', text, { isError: true }), h.ctx);
+
+  assert.deepEqual(Object.keys(result), ['content']);
+  assert.match(result.content[0].text, /\[chisle: elided/);
+  assert.match(result.content[0].text, /Command exited with code 23/);
+});
+
 test('never compresses read, edit, or write, even when env-allowlisted', async () => {
   process.env.CHISLE_DEFAULT_MODE = 'on';
   process.env.CHISLE_COMPRESS_TOOLS = 'read,edit,write';
