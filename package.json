@@ -99,7 +99,8 @@
     ".claude-plugin/",
     ".opencode/",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "NOTICE"
   ],
   "publishConfig": {
     "access": "public",

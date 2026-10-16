@@ -18,7 +18,7 @@ Safety/correctness: the compressor runs behind an allowlist (Claude Code: Bash, 
 
 Install: `npx chisle` (npm, auto-detects all 12 agents), `claude plugin marketplace add JayPokale/Chisle` then `claude plugin install chisle@chisle` (Claude Code plugin), or `pi install npm:chisle` (Pi package). Requires Node >= 18. MIT license.
 
-Lineage: descendant of the caveman and ponytail projects (terse-persona axis), both credited in the repository's prior-art table and LICENSE; Chisle adds the tool-output-compression and context-diet axes and publishes live benchmarks against both.
+Lineage: descendant of the caveman and ponytail projects (terse-persona axis), both credited in the repository's prior-art table and NOTICE file; Chisle adds the tool-output-compression and context-diet axes and publishes live benchmarks against both.
 
 ## Links
 

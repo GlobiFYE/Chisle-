@@ -243,7 +243,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Built by [Jay Pokale](https://github.com
 
 [MIT](LICENSE). The shortest license that works.
 
-Chisle began as a merge of [caveman](https://github.com/JuliusBrussee/caveman) (terse prose) and [ponytail](https://github.com/DietrichGebert/ponytail) (lazy-senior-dev code rules), and its ruleset still carries parts of both. Their MIT notices are in [LICENSE](LICENSE).
+Chisle began as a merge of [caveman](https://github.com/JuliusBrussee/caveman) (terse prose) and [ponytail](https://github.com/DietrichGebert/ponytail) (lazy-senior-dev code rules), and its ruleset still carries parts of both. Their MIT notices are in [NOTICE](NOTICE).
 
 ## Contributors
 
