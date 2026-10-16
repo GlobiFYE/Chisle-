@@ -1,12 +1,12 @@
 # Reliability: the tool that (almost) never backfires — 2026-06-29
 
-> **2026-07-07 update:** a fresh re-run produced one RDXmin backfire
+> **2026-07-07 update:** a fresh re-run produced one Chisle backfire
 > (rest-graphql, 173% billed — root-caused and fixed). The claims below are
 > scoped to the June suite; combined 20-task ledger and the fix live in
 > [`2026-07-07-verify-rerun.md`](./2026-07-07-verify-rerun.md).
 
 The headline number people chase is "fewest tokens on one answer." It's the wrong
-metric. caveman wins that race on prose; ponytail wins it on some code. RDXmin
+metric. caveman wins that race on prose; ponytail wins it on some code. Chisle
 usually places 2nd by a hair. If that were the whole story, you'd pick a specialist.
 
 It isn't. The metric that matters for a real, mixed workload is **downside risk**:
@@ -23,11 +23,11 @@ over-engineering-trap "judgment" prompts. Raw cells: [`raw/`](./raw/) +
 **Metric: billed `usage.output_tokens`** (what you pay — includes model
 reasoning), verified reproducible from the committed raw cells 2026-07-07.
 On the alternative *visible-answer-size* metric the picture is one notch less
-clean: RDXmin's `rest-graphql` (Haiku) answer ran 107% of vanilla's — the lone
+clean: Chisle's `rest-graphql` (Haiku) answer ran 107% of vanilla's — the lone
 visible-size backfire; caveman 101% ×1, ponytail 160% ×4. "0 backfires" is a
 billed-tokens claim, stated here so nobody has to diff the metrics themselves.
 
-| task | caveman | ponytail | RDXmin |
+| task | caveman | ponytail | Chisle |
 |------|--------:|---------:|---------:|
 | auth-bug | 80% | 76% | 67% |
 | cache | 8% | 16% | 12% |
@@ -53,27 +53,27 @@ billed-tokens claim, stated here so nobody has to diff the metrics themselves.
   lean answer). It's the only arm that regularly *costs* you tokens.
 - **caveman backfires occasionally** — on `regex-concept` it ran 30% over baseline.
   Rare, but it has no code judgment, so it over-answers a vague request (the
-  `caching` task: 330 tokens dumping three implementations vs RDXmin's 151).
-- **RDXmin never backfires.** Worst case 83% — still a 17% saving. Best case 12%.
+  `caching` task: 330 tokens dumping three implementations vs Chisle's 151).
+- **Chisle never backfires.** Worst case 83% — still a 17% saving. Best case 12%.
   It's never the single leanest *and* never the loser: always near the front, with
   no failure mode.
 
 ## The honest positioning
 
-RDXmin does not beat caveman at pure prose terseness, and doesn't need to. Its
+Chisle does not beat caveman at pure prose terseness, and doesn't need to. Its
 value is being the **dependable generalist**:
 
-| | caveman | ponytail | RDXmin |
+| | caveman | ponytail | Chisle |
 |---|:---:|:---:|:---:|
 | Terse prose | ✅ best | ❌ pads | ✅ close |
 | Lean + correct code judgment | ❌ no ladder | ✅ | ✅ |
 | Never worse than baseline | ⚠️ 1× | ❌ 4× | ✅ **0×** |
 | One tool, no conflicting 2nd plugin | — | — | ✅ |
 
-To get RDXmin's coverage from the specialists you'd install **both** caveman and
+To get Chisle's coverage from the specialists you'd install **both** caveman and
 ponytail — which conflict (caveman compresses all prose; ponytail writes verbose
 prose), double the per-session injection overhead, and in a head-to-head on the
-`ratelimit` task the stacked pair (605 tokens) did *worse* than RDXmin alone (595).
+`ratelimit` task the stacked pair (605 tokens) did *worse* than Chisle alone (595).
 
 Small sample, two models, temperature variance. Directional. Re-run with
 `benchmarks/run-live.sh` and audit the raw cells yourself.

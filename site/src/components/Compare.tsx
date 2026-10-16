@@ -23,7 +23,7 @@ const TASKS = samples.tasks as Task[];
 const RIVALS = [
   { key: "caveman", label: "caveman" },
   { key: "ponytail", label: "ponytail" },
-  { key: "rdxmin", label: "chisle" },
+  { key: "chisle", label: "chisle" },
 ] as const;
 
 function pct(a: number, b: number) {
@@ -32,11 +32,11 @@ function pct(a: number, b: number) {
 
 export default function Compare() {
   const [taskId, setTaskId] = useState(TASKS[0].id);
-  const [arm, setArm] = useState<string>("rdxmin");
+  const [arm, setArm] = useState<string>("chisle");
 
   const task = TASKS.find((t) => t.id === taskId)!;
   const base = task.arms.vanilla;
-  const cur = task.arms[arm] ?? task.arms.rdxmin;
+  const cur = task.arms[arm] ?? task.arms.chisle;
   const share = pct(cur.answerTokens, base.answerTokens);
 
   return (

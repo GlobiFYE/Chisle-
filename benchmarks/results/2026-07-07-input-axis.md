@@ -62,7 +62,7 @@ output → one-line marker) scored **0 hits on this corpus** — outputs here we
 already source-filtered by rtk, and real reruns usually differ by timestamps.
 It stays because the test-rerun case is real and its cost is zero, but per
 house rules it's labeled speculative until it earns a number
-(`RDX_COMPRESS_DEDUP=0` to disable).
+(`CHISLE_COMPRESS_DEDUP=0` to disable).
 
 ## Finding 4 — the resend multiplier (why 1.2% understates it)
 
@@ -81,4 +81,4 @@ one-shot figure (60k) is the floor, not the estimate.
 - Chars/4 is a rough token proxy for code-heavy text.
 - Correctness of eliding is guarded (allowlist + error salvage + head/tail),
   not yet adversarially benchmarked like the output axis's backfire ledger.
-  Kill switch: `RDX_COMPRESS=0`.
+  Kill switch: `CHISLE_COMPRESS=0`.

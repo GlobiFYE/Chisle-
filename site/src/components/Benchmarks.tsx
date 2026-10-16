@@ -177,7 +177,7 @@ export default function Benchmarks() {
               <tbody className="divide-y divide-line">
                 {AGG.groups.map((g) => {
                   const row = g[metric] as Record<string, number>;
-                  const best = Math.min(row.caveman, row.ponytail, row.rdxmin);
+                  const best = Math.min(row.caveman, row.ponytail, row.chisle);
                   const cell = (v: number) =>
                     `py-2 pr-4 text-right tabular-nums ${v > 100 ? "text-waste" : ""} ${v === best ? "font-semibold" : ""}`;
                   return (
@@ -186,8 +186,8 @@ export default function Benchmarks() {
                       <td className="py-2 pr-4 text-right text-dim tabular-nums">{g.n}</td>
                       <td className={cell(row.caveman)}>{row.caveman}%</td>
                       <td className={cell(row.ponytail)}>{row.ponytail}%</td>
-                      <td className={`py-2 text-right tabular-nums font-semibold ${row.rdxmin > 100 ? "text-waste" : "text-accent"}`}>
-                        {row.rdxmin}%
+                      <td className={`py-2 text-right tabular-nums font-semibold ${row.chisle > 100 ? "text-waste" : "text-accent"}`}>
+                        {row.chisle}%
                       </td>
                     </tr>
                   );

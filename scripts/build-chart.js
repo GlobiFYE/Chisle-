@@ -21,11 +21,9 @@ const PI_RAW_DIR = path.join(ROOT, 'benchmarks', 'results', 'raw-pi');
 const PI_SVG_OUT = path.join(ROOT, 'assets', 'benchmark-pi.svg');
 
 // Our own arm. The key is the token in the committed raw filenames
-// (raw*/<task>__rdxmin.json) and predates the RDXmin -> Chisle rename, so it
-// stays put; only the display label follows the new name. Renaming the key
-// silently orphans the result cells and zeroes our bar — reference it
-// through this constant so the two can never drift apart again.
-const SELF = 'rdxmin';
+// (raw*/<task>__chisle.json); renaming it orphans the result cells and zeroes
+// our bar, so reference it through this constant.
+const SELF = 'chisle';
 const ARMS = [
   { key: 'caveman',  label: 'caveman', color: '#d9822b' },
   { key: 'ponytail', label: 'ponytail', color: '#cf3b3b' },

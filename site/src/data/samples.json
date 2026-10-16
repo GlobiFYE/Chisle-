@@ -34,7 +34,7 @@
           "truncated": false,
           "text": "I don't see an existing API codebase in `/tmp`. Can you show me:\n\n1. What framework you're using (FastAPI, Flask, Django, etc.)\n2. The current user profile endpoint code\n3. What kind of cache behavior you need (TTL? Size limit? Invalidation strategy?)\n\nOr if you want me to assume Python + `functools.lru_cache`, I can sketch that in one response — but I'd rather see your actual code first so the cache integrates correctly with your app."
         },
-        "rdxmin": {
+        "chisle": {
           "tokens": 272,
           "answerTokens": 40,
           "thinkingTokens": 232,
@@ -77,7 +77,7 @@
           "truncated": false,
           "text": "I need to see your current search input code to add debounce properly. Can you share:\n\n1. The file and current implementation (HTML + JS, or React, or Vue, etc.)\n2. What framework/library you're using\n\nOr if you just want a quick example, here's a vanilla JS debounce wrapper:\n\n```js\nfunction debounce(func, delay) {\n  let timeoutId;\n  return function (...args) {\n    clearTimeout(timeoutId);\n    timeoutId = setTimeout(() => func(...args), delay);\n  };\n}\n\nconst handleSearch = debounce((query) => {\n  fetch(`/api/search?q=${query}`).then(r => r.json()).then(console.log);\n}, 300);\n\ndocument.querySelector('input').addEventListener('input', (e) => {\n  handleSearch(e.target.value);\n});\n```\n\nIf you're using lodash, it's just `_.debounce(handleSearch, 300)`.\n\nShare your actual code and I'll integrate it properly."
         },
-        "rdxmin": {
+        "chisle": {
           "tokens": 731,
           "answerTokens": 472,
           "thinkingTokens": 259,
@@ -120,7 +120,7 @@
           "truncated": false,
           "text": "I'll search for the auth middleware code to find where this boundary check is happening.\n<function_calls>\n<invoke name=\"bash\">\n<parameter name=\"tool_use_id\">search_auth</parameter>\n<parameter name=\"command\">find /tmp -type f \\( -name \"*.js\" -o -name \"*.ts\" -o -name \"*.py\" -o -name \"*.go\" -o -name \"*.java\" \\) 2>/dev/null | head -20</parameter>\n</invoke>\n</function_calls>\n<function_calls>\n<invoke name=\"bash\">\n<parameter name=\"tool_use_id\">search_auth_grep</parameter>\n<parameter name=\"command\">grep -r \"currentTime.*expiry\\|token.*expir\" /tmp --include=\"*.js\" --include=\"*.ts\" --include=\"*.py\" --include=\"*.go\" 2>/dev/null</parameter>\n</invoke>\n</function_calls>\n\nLet me check what's actually in /tmp:\n<function_calls>\n<invoke name=\"bash\">\n<parameter name=\"tool_use_id\">list_tmp</parameter>\n<parameter name=\"command\">ls -la /tmp | head -20</parameter>\n</invoke>\n</function_calls>\n\nCan you share the auth middleware file or point me to where it's located? I need to see the actual code to identify the exact boundary condition bug. Is it in a specific file or directory?"
         },
-        "rdxmin": {
+        "chisle": {
           "tokens": 823,
           "answerTokens": 230,
           "thinkingTokens": 593,
@@ -163,7 +163,7 @@
           "truncated": true,
           "text": "## How it works\n\nA connection pool maintains a reusable set of database connections. Instead of opening a new connection for each request (expensive), your app borrows an idle one from the pool, uses it, then returns it.\n\n```\nRequest 1: borrow conn A → query → return conn A\nRequest 2: reuses conn A → query → return conn A\nRequest 3: conn A busy? grab conn B → query → return conn B\n```\n\nThe pool manages sizing: min connections kept warm, max connections allowed, timeouts for stale/leaked connections.\n\n## Why it helps\n\n1. **Speed:** Opening a database connection is slow (SSL handshake, authentication, warmup). Reusing existing connections skips that overhead per request.\n\n2. **Resource limits:** A process can only open so many connections. Without pooling, 1000 requests = 1000 connections = crash. With pooling (size 20), 1000 requests reuse the same 20 connections.\n\n3. **Graceful degradation:** When the pool maxes out, new requests queue instead of failing. You get predictable backpressure, not cascading failures.\n\n4. **Less server load:** Fewer connections = less RAM, fewer file descriptors, fewer idle database threads on the server side.\n\n## Real impact\n\nWithout pooling: 10 requests × 500ms connection overhead = 5 seconds just opening connections.  \nWith pooling: 10 requests, connections already open = near-instant reuse.\n\nMost frameworks (Django, Rails, Node drivers) have pool"
         },
-        "rdxmin": {
+        "chisle": {
           "tokens": 569,
           "answerTokens": 358,
           "thinkingTokens": 211,
@@ -206,7 +206,7 @@
           "truncated": false,
           "text": "**REST:** Simple to build and deploy, standard HTTP semantics (caching, status codes), predictable—but clients often over-fetch data or need multiple round-trips for related resources.\n\n**GraphQL:** Clients request exactly what they need (no over/under-fetching), great for complex or varying client needs (mobile, dashboards), single query—but harder to cache, requires more backend complexity, overkill for simple CRUD APIs.\n\n**Lean recommendation:** Start with REST unless you have multiple clients with very different data needs (mobile app + web + third-party integrations). REST scales your team faster; GraphQL pays off when the over-fetching pain is real, not theoretical."
         },
-        "rdxmin": {
+        "chisle": {
           "tokens": 550,
           "answerTokens": 178,
           "thinkingTokens": 372,
@@ -249,7 +249,7 @@
           "truncated": false,
           "text": "A backreference is a way to match the same text that was already captured by a group earlier in the pattern. You reference a captured group with `\\1` (first group), `\\2` (second group), etc.\n\n**Example:** Match repeated words:\n```regex\n(\\w+)\\s+\\1\n```\n\nThis pattern captures a word in `(\\w+)`, matches whitespace `\\s+`, then `\\1` matches that exact same word again. So it matches \"hello hello\" or \"foo foo\", but not \"hello world\"."
         },
-        "rdxmin": {
+        "chisle": {
           "tokens": 419,
           "answerTokens": 85,
           "thinkingTokens": 334,
@@ -270,12 +270,12 @@
         "tokens": {
           "caveman": 81,
           "ponytail": 127,
-          "rdxmin": 82
+          "chisle": 82
         },
         "lines": {
           "caveman": 66,
           "ponytail": 54,
-          "rdxmin": 52
+          "chisle": 52
         }
       },
       {
@@ -284,12 +284,12 @@
         "tokens": {
           "caveman": 69,
           "ponytail": 154,
-          "rdxmin": 79
+          "chisle": 79
         },
         "lines": {
           "caveman": 55,
           "ponytail": 44,
-          "rdxmin": 50
+          "chisle": 50
         }
       },
       {
@@ -298,12 +298,12 @@
         "tokens": {
           "caveman": 101,
           "ponytail": 86,
-          "rdxmin": 88
+          "chisle": 88
         },
         "lines": {
           "caveman": 89,
           "ponytail": 75,
-          "rdxmin": 57
+          "chisle": 57
         }
       },
       {
@@ -312,12 +312,12 @@
         "tokens": {
           "caveman": 147,
           "ponytail": 157,
-          "rdxmin": 111
+          "chisle": 111
         },
         "lines": {
           "caveman": 94,
           "ponytail": 85,
-          "rdxmin": 68
+          "chisle": 68
         }
       },
       {
@@ -326,12 +326,12 @@
         "tokens": {
           "caveman": 68,
           "ponytail": 121,
-          "rdxmin": 76
+          "chisle": 76
         },
         "lines": {
           "caveman": 63,
           "ponytail": 50,
-          "rdxmin": 50
+          "chisle": 50
         }
       }
     ]

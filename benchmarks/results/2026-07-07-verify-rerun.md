@@ -7,17 +7,17 @@ writeups. Two mistakes found and fixed; one claim revised.
 
 Recomputed from the committed raw cells (`raw/` + `raw-sonnet/`, billed
 `usage.output_tokens`, 14 four-arm-complete tasks): caveman worst 130%
-(regex-concept), ponytail worst 227% (retry, Sonnet), RDXmin worst 83%
+(regex-concept), ponytail worst 227% (retry, Sonnet), Chisle worst 83%
 (signup, Sonnet), over-baseline counts 1 / 4 / 0. Matches the published
 reliability table to the digit.
 
 **Found: metric ambiguity.** On the *visible-answer-size* metric the June data
-shows RDXmin over baseline once (rest-graphql, Haiku, 107%). "0 backfires" was
+shows Chisle over baseline once (rest-graphql, Haiku, 107%). "0 backfires" was
 a billed-tokens claim but wasn't labeled as such — now stated explicitly in
 the reliability writeup.
 
 **Found: two sources of truth.** `CONTRIBUTING.md` said editing
-`skills/rdx/SKILL.md` + regenerating keeps the per-agent rule copies in sync.
+`skills/chisle/SKILL.md` + regenerating keeps the per-agent rule copies in sync.
 False — `scripts/build-rules.js` carries its own condensed BODY; SKILL.md
 edits silently propagated nowhere. Fixed (BODY updated + labeled as a manual
 mirror).
@@ -28,7 +28,7 @@ Same 6 tasks × 4 arms, competitor skills taken from their **installed plugins**
 (`caveman@caveman`, `ponytail@ponytail` via plugin cache), arms run in
 parallel per task. Billed output tokens as % of vanilla:
 
-| segment | caveman | ponytail | RDXmin |
+| segment | caveman | ponytail | Chisle |
 |---|--:|--:|--:|
 | coding | 160% | 84% | **64%** |
 | noncoding | 137% | 106% | 117% |
@@ -36,11 +36,11 @@ parallel per task. Billed output tokens as % of vanilla:
 
 Per-arm backfires (billed > vanilla): **caveman 5/6** (worst: `cache` at
 **424%** — 206 lines of speculative implementations for a one-line ask),
-**ponytail 4/6** (worst 119%), **RDXmin 1/6** (`rest-graphql`, 173%).
+**ponytail 4/6** (worst 119%), **Chisle 1/6** (`rest-graphql`, 173%).
 
 **Correctness: 24/24 answers graded correct.** All four arms found the
 auth-bug boundary fix; on `cache`/`debounce` in an empty directory,
-ponytail + RDXmin correctly asked for the codebase (ladder rung 1) instead of
+ponytail + Chisle correctly asked for the codebase (ladder rung 1) instead of
 dumping code — caveman's 424% is exactly the no-code-judgment failure mode.
 
 ### Combined ledger, June + July (20 tasks, billed tokens)
@@ -49,19 +49,19 @@ dumping code — caveman's 424% is exactly the no-code-judgment failure mode.
 |---|--:|--:|--:|--:|--:|
 | caveman | 80% | 98% | 81% | **424%** | 6 / 20 |
 | ponytail | 68% | 91% | 97% | 227% | 8 / 20 |
-| **RDXmin** | **52%** | **69%** | **74%** | **173%** | **1 / 20** |
+| **Chisle** | **52%** | **69%** | **74%** | **173%** | **1 / 20** |
 
 ¹ sum of the arm's billed tokens across all 20 tasks ÷ sum of vanilla's —
-what the combined bill actually was. RDXmin leads every aggregate: average,
+what the combined bill actually was. Chisle leads every aggregate: average,
 median, total, worst case, and backfire count.
 
 The June "never backfires (0/14)" claim did not survive the re-run and is
-retired. The honest replacement: RDXmin backfired once in 20 tasks;
+retired. The honest replacement: Chisle backfired once in 20 tasks;
 the specialists backfired 6× and 8×, with far worse blowups.
 
 ## 3. The one backfire, diagnosed and fixed
 
-RDXmin's `rest-graphql` answer (22 lines) used headed pro/con bullet walls +
+Chisle's `rest-graphql` answer (22 lines) used headed pro/con bullet walls +
 "Pick REST if / Pick GraphQL if" scaffolding — structure its own ruleset
 explicitly bans. The rule was too weak for "summarize/compare" prompts.
 Fix: SKILL.md structure rule now names the comparison-prompt trap with the
@@ -69,8 +69,8 @@ measured consequence.
 
 **Validation** (3 trials each, same day, same model): vanilla mean **487**
 billed tokens (341/474/645 — the original 410 baseline was a lucky draw);
-hardened RDXmin mean **453 = 93%** (407/455/498), answer prose-form, complete,
-correct. Pre-fix RDXmin: 708 = 145% of the fair vanilla mean.
+hardened Chisle mean **453 = 93%** (407/455/498), answer prose-form, complete,
+correct. Pre-fix Chisle: 708 = 145% of the fair vanilla mean.
 
 ## Caveats
 

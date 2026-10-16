@@ -32,7 +32,7 @@ solves the task. An arm that's 90% shorter but fails the task scores zero.
 ## 1. Live 4-arm head-to-head
 
 `run-live.sh` drives authenticated Claude Code or Pi across four arms — vanilla
-(no tool), caveman, ponytail, rdxmin — over 6 tasks (3 coding, 3 non-coding).
+(no tool), caveman, ponytail, chisle — over 6 tasks (3 coding, 3 non-coding).
 Each arm differs **only** in the system prompt injected; plugins, tone hooks, and
 personal config are neutralized via an isolated `HOME` + config dir holding only
 credentials. Competitor prompts resolve from a local clone or the installed
@@ -55,10 +55,9 @@ harness receipt and raw events: [`2026-09-11-pi.md`](./results/2026-09-11-pi.md)
 
 ### Results — billed output tokens as % of vanilla (lower = leaner)
 
-`node benchmarks/aggregate.js`, over the committed suites. rdxmin is Chisle
-(historical key, matches the raw filenames).
+`node benchmarks/aggregate.js`, over the committed suites.
 
-| segment | vanilla | caveman | ponytail | **rdxmin** |
+| segment | vanilla | caveman | ponytail | **chisle** |
 |---------|--------:|--------:|---------:|-----------:|
 | coding | 100% | 36% | 33% | **27%** |
 | non-coding | 100% | 99% | 115% | **73%** |
@@ -66,7 +65,7 @@ harness receipt and raw events: [`2026-09-11-pi.md`](./results/2026-09-11-pi.md)
 
 Raw totals behind that (billed tokens / answer lines, n cells):
 
-| segment | vanilla | caveman | ponytail | **rdxmin** |
+| segment | vanilla | caveman | ponytail | **chisle** |
 |---------|--------:|--------:|---------:|-----------:|
 | coding | 7766t / 298L (n=3) | 2818t / 118L (n=3) | 2592t / 56L (n=3) | **2075t / 43L (n=3)** |
 | non-coding | 1327t / 46L (n=3) | 1310t / 42L (n=3) | 1525t / 75L (n=3) | **966t / 19L (n=3)** |
@@ -75,7 +74,7 @@ Raw totals behind that (billed tokens / answer lines, n cells):
 n=6 tasks per arm is small — treat the split between caveman and ponytail as
 noise, and only the vanilla-vs-rest gap as load-bearing.
 
-rdxmin is leanest on code; on pure prose a dedicated prose compressor wins on a
+chisle is leanest on code; on pure prose a dedicated prose compressor wins on a
 good day. The chart and README state this plainly — no cherry-picking.
 
 ## 2. Input-axis replay (deterministic, free)

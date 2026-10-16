@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Live 4-arm benchmark: vanilla vs caveman vs ponytail vs chisle (arm key stays "rdxmin" — matches historical raw filenames).
+# Live 4-arm benchmark: vanilla vs caveman vs ponytail vs chisle.
 #
 # Drives authenticated Claude Code or Pi headlessly. Each arm differs ONLY in the
 # system prompt appended (the respective SKILL.md body); vanilla appends nothing.
@@ -67,8 +67,7 @@ strip_fm() { awk 'BEGIN{n=0} /^---[[:space:]]*$/{n++; next} n>=2{print} n<2 && !
 for f in "$CAVEMAN_SKILL" "$PONYTAIL_SKILL" "$CHISLE_SKILL"; do [ -f "$f" ] || { echo "missing skill: $f"; exit 1; }; done
 strip_fm "$CAVEMAN_SKILL" > "$ISO/caveman.txt"
 strip_fm "$PONYTAIL_SKILL" > "$ISO/ponytail.txt"
-# Arm key stays "rdxmin": renaming it would orphan every committed raw/*__rdxmin.json.
-strip_fm "$CHISLE_SKILL" > "$ISO/rdxmin.txt"
+strip_fm "$CHISLE_SKILL" > "$ISO/chisle.txt"
 
 # Tasks: id<TAB>kind<TAB>prompt
 TASKS_LARGE=$(cat <<'EOF'
@@ -157,7 +156,7 @@ while IFS=$'\t' read -r id kind prompt; do
   echo "task: $id ($kind)"
   # Arms are independent → run the 4 concurrently; wait per task keeps
   # rate-limit pressure bounded and output readable.
-  for arm in vanilla caveman ponytail rdxmin; do
+  for arm in vanilla caveman ponytail chisle; do
     run_cell "$arm" "$id" "$prompt" &
   done
   wait
