@@ -11,7 +11,12 @@ import samples from "@/data/samples.json";
 // hand-written "illustrative" rewrites. That is the whole differentiator, so the
 // basis label stays visible at all times.
 
-type Cell = { tokens: number; lines: number; chars: number; truncated: boolean; text: string };
+// tokens = billed output; answerTokens = tokens minus hidden thinking (what you
+// read); thinkingTokens is billed too, so it stays on screen beside the answer.
+type Cell = {
+  tokens: number; answerTokens: number; thinkingTokens: number;
+  lines: number; chars: number; truncated: boolean; text: string;
+};
 type Task = { id: string; kind: string; prompt: string; arms: Record<string, Cell> };
 
 const TASKS = samples.tasks as Task[];
@@ -32,7 +37,7 @@ export default function Compare() {
   const task = TASKS.find((t) => t.id === taskId)!;
   const base = task.arms.vanilla;
   const cur = task.arms[arm] ?? task.arms.rdxmin;
-  const share = pct(cur.tokens, base.tokens);
+  const share = pct(cur.answerTokens, base.answerTokens);
 
   return (
     <section id="compare" className="py-28">
@@ -74,14 +79,15 @@ export default function Compare() {
               <header className="flex items-baseline justify-between border-b border-line px-4 py-3">
                 <span className="text-sm font-semibold">bare model</span>
                 <span className="font-mono text-xs text-dim">
-                  {base.tokens.toLocaleString()} tok · {base.lines} lines
+                  {base.answerTokens.toLocaleString()} answer tok · {base.lines} lines
+                  <span className="opacity-60"> · +{base.thinkingTokens.toLocaleString()} thinking</span>
                 </span>
               </header>
               <div className="pane-scroll max-h-96 flex-1 overflow-auto px-4 py-3 text-[12px] leading-relaxed text-dim">
                 <Markdown>{base.text}</Markdown>
                 {base.truncated && (
                   <p className="mt-3 border-t border-line pt-2 font-mono text-[10.5px] text-dim">
-                    … truncated for the page; the token count is the full response
+                    … truncated for the page; token counts are the full response
                   </p>
                 )}
               </div>
@@ -110,7 +116,8 @@ export default function Compare() {
                   <span className={share > 100 ? "text-waste" : "text-accent"}>{share}%</span>
                   <span className="text-dim">
                     {" "}
-                    · {cur.tokens.toLocaleString()} tok · {cur.lines} lines
+                    · {cur.answerTokens.toLocaleString()} answer tok · {cur.lines} lines
+                    <span className="opacity-60"> · +{cur.thinkingTokens.toLocaleString()} thinking</span>
                   </span>
                 </span>
               </header>
@@ -118,7 +125,7 @@ export default function Compare() {
                 <Markdown>{cur.text}</Markdown>
                 {cur.truncated && (
                   <p className="mt-3 border-t border-line pt-2 font-mono text-[10.5px] text-dim">
-                    … truncated for the page; the token count is the full response
+                    … truncated for the page; token counts are the full response
                   </p>
                 )}
               </div>
@@ -131,8 +138,10 @@ export default function Compare() {
             <span className="mr-2 rounded bg-accent-soft px-1.5 py-0.5 font-mono text-[10px] text-accent">
               basis: measured
             </span>
-            {samples.suite} Percentages are billed output tokens against that task&apos;s own
-            baseline.{" "}
+            {samples.suite} Percentages are answer tokens (billed output minus hidden thinking)
+            against that task&apos;s own baseline. Thinking tokens are billed on every response
+            too, so each count shows them alongside. The ruleset itself is input, not output, and
+            is in neither number.{" "}
             {task.id === "cache" && (
               <>
                 <strong className="text-fg">Read this one carefully:</strong> the prompt ships with

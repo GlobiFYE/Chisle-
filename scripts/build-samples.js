@@ -39,8 +39,13 @@ function cell(task, arm) {
   if (!d || d.is_error) return null;
   const full = (d.result || '').trim();
   const truncated = full.length > MAX_CHARS;
+  // Billed output = visible answer + hidden thinking, both paid per response.
+  // The page leads with the answer and shows thinking beside it.
+  const thinking = (d.usage.output_tokens_details && d.usage.output_tokens_details.thinking_tokens) || 0;
   return {
     tokens: d.usage.output_tokens,
+    answerTokens: d.usage.output_tokens - thinking,
+    thinkingTokens: thinking,
     lines: full ? full.split('\n').length : 0,
     chars: full.length,
     truncated,

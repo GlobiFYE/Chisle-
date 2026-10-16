@@ -9,6 +9,8 @@
       "arms": {
         "vanilla": {
           "tokens": 440,
+          "answerTokens": 173,
+          "thinkingTokens": 267,
           "lines": 8,
           "chars": 626,
           "truncated": false,
@@ -16,6 +18,8 @@
         },
         "caveman": {
           "tokens": 481,
+          "answerTokens": 320,
+          "thinkingTokens": 161,
           "lines": 20,
           "chars": 839,
           "truncated": false,
@@ -23,6 +27,8 @@
         },
         "ponytail": {
           "tokens": 337,
+          "answerTokens": 120,
+          "thinkingTokens": 217,
           "lines": 7,
           "chars": 439,
           "truncated": false,
@@ -30,6 +36,8 @@
         },
         "rdxmin": {
           "tokens": 272,
+          "answerTokens": 40,
+          "thinkingTokens": 232,
           "lines": 1,
           "chars": 140,
           "truncated": false,
@@ -44,6 +52,8 @@
       "arms": {
         "vanilla": {
           "tokens": 600,
+          "answerTokens": 382,
+          "thinkingTokens": 218,
           "lines": 50,
           "chars": 1296,
           "truncated": false,
@@ -51,6 +61,8 @@
         },
         "caveman": {
           "tokens": 467,
+          "answerTokens": 73,
+          "thinkingTokens": 394,
           "lines": 7,
           "chars": 262,
           "truncated": false,
@@ -58,6 +70,8 @@
         },
         "ponytail": {
           "tokens": 931,
+          "answerTokens": 249,
+          "thinkingTokens": 682,
           "lines": 28,
           "chars": 813,
           "truncated": false,
@@ -65,6 +79,8 @@
         },
         "rdxmin": {
           "tokens": 731,
+          "answerTokens": 472,
+          "thinkingTokens": 259,
           "lines": 61,
           "chars": 1497,
           "truncated": true,
@@ -79,6 +95,8 @@
       "arms": {
         "vanilla": {
           "tokens": 424,
+          "answerTokens": 284,
+          "thinkingTokens": 140,
           "lines": 18,
           "chars": 883,
           "truncated": false,
@@ -86,6 +104,8 @@
         },
         "caveman": {
           "tokens": 1186,
+          "answerTokens": 272,
+          "thinkingTokens": 914,
           "lines": 21,
           "chars": 695,
           "truncated": false,
@@ -93,6 +113,8 @@
         },
         "ponytail": {
           "tokens": 616,
+          "answerTokens": 414,
+          "thinkingTokens": 202,
           "lines": 23,
           "chars": 1071,
           "truncated": false,
@@ -100,6 +122,8 @@
         },
         "rdxmin": {
           "tokens": 823,
+          "answerTokens": 230,
+          "thinkingTokens": 593,
           "lines": 16,
           "chars": 554,
           "truncated": false,
@@ -114,6 +138,8 @@
       "arms": {
         "vanilla": {
           "tokens": 465,
+          "answerTokens": 384,
+          "thinkingTokens": 81,
           "lines": 23,
           "chars": 1724,
           "truncated": true,
@@ -121,6 +147,8 @@
         },
         "caveman": {
           "tokens": 735,
+          "answerTokens": 329,
+          "thinkingTokens": 406,
           "lines": 23,
           "chars": 1310,
           "truncated": false,
@@ -128,6 +156,8 @@
         },
         "ponytail": {
           "tokens": 515,
+          "answerTokens": 377,
+          "thinkingTokens": 138,
           "lines": 28,
           "chars": 1500,
           "truncated": true,
@@ -135,6 +165,8 @@
         },
         "rdxmin": {
           "tokens": 569,
+          "answerTokens": 358,
+          "thinkingTokens": 211,
           "lines": 23,
           "chars": 1602,
           "truncated": true,
@@ -149,6 +181,8 @@
       "arms": {
         "vanilla": {
           "tokens": 400,
+          "answerTokens": 176,
+          "thinkingTokens": 224,
           "lines": 3,
           "chars": 830,
           "truncated": false,
@@ -156,6 +190,8 @@
         },
         "caveman": {
           "tokens": 574,
+          "answerTokens": 127,
+          "thinkingTokens": 447,
           "lines": 5,
           "chars": 615,
           "truncated": false,
@@ -163,6 +199,8 @@
         },
         "ponytail": {
           "tokens": 504,
+          "answerTokens": 156,
+          "thinkingTokens": 348,
           "lines": 5,
           "chars": 680,
           "truncated": false,
@@ -170,6 +208,8 @@
         },
         "rdxmin": {
           "tokens": 550,
+          "answerTokens": 178,
+          "thinkingTokens": 372,
           "lines": 5,
           "chars": 762,
           "truncated": false,
@@ -184,6 +224,8 @@
       "arms": {
         "vanilla": {
           "tokens": 273,
+          "answerTokens": 179,
+          "thinkingTokens": 94,
           "lines": 10,
           "chars": 579,
           "truncated": false,
@@ -191,6 +233,8 @@
         },
         "caveman": {
           "tokens": 454,
+          "answerTokens": 100,
+          "thinkingTokens": 354,
           "lines": 9,
           "chars": 314,
           "truncated": false,
@@ -198,6 +242,8 @@
         },
         "ponytail": {
           "tokens": 300,
+          "answerTokens": 127,
+          "thinkingTokens": 173,
           "lines": 8,
           "chars": 429,
           "truncated": false,
@@ -205,6 +251,8 @@
         },
         "rdxmin": {
           "tokens": 419,
+          "answerTokens": 85,
+          "thinkingTokens": 334,
           "lines": 3,
           "chars": 280,
           "truncated": false,
