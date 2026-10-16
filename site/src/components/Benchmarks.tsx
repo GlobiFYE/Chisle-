@@ -96,7 +96,7 @@ export default function Benchmarks() {
             tie, and neither is clearly below a bare model; ponytail&apos;s answers are short but
             its reasoning grows almost 5×. A single cell says little: the bare model beats itself
             on 13 of 26 cells between seeds. Chisle began as a merge of caveman and ponytail; their
-            MIT notices are in the repo&apos;s LICENSE.
+            MIT notices are in the repo&apos;s NOTICE file.
           </p>
         </Reveal>
 

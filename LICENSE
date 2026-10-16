@@ -19,15 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Chisle's ruleset (skills/chisle/SKILL.md and the rule copies generated from it)
-began as a merge of two MIT-licensed skills and still carries portions of them.
-Their notices, under the same MIT permission notice as above:
-
-caveman — https://github.com/JuliusBrussee/caveman
-Copyright (c) 2026 Julius Brussee
-
-ponytail — https://github.com/DietrichGebert/ponytail
-Copyright (c) 2026 DietrichGebert
