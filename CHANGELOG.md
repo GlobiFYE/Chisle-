@@ -18,6 +18,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 - **ponytail in the agentic benchmark.** `benchmarks/agentic/run.js` gains a `ponytail` arm. On the six fixtures (6 seeds) ponytail passed 32/36 hidden tests against 28/36 for both vanilla and Chisle (p = 0.34, not separable from noise), at +14% cost per run. (#37)
 
 ### Docs
+- **One benchmark chart.** README and site now chart only the Pi answer-length result (Chisle 37%, ponytail 49%, caveman 56% of a bare model). The re-run, Claude coding, June 20-task, per-task, by-size and by-kind charts are gone; their numbers stay as tables in README, `docs/benchmarks.md` and the site. `scripts/build-chart.js` now builds only `assets/benchmark-pi.svg`.
 - Failed OpenCode Bash calls verified live on OpenCode 1.18.31: they reach `tool.execute.after` and are compressed with exit metadata intact. (#29, #33)
 - **Credit caveman and ponytail.** Chisle's ruleset began as a merge of both MIT-licensed skills; their copyright notices are now in `LICENSE` and the README names them. (#37)
 

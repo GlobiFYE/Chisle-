@@ -28,10 +28,10 @@
 Chisle is a Claude Code plugin that makes Claude cheaper to run without making it dumber. It cuts what Claude writes: no filler, no hedging, no speculative abstractions, just the smallest code that works. It also cuts what Claude reads: a `PostToolUse` hook trims oversized tool output by ~46% before it re-enters the context window, where it would be re-billed on every later request. In agent-loop tests Claude with Chisle passes the same tasks as Claude without it. One `npx chisle` installs it, and the same ruleset ships to Pi, Cursor, Codex, Gemini, Copilot, OpenCode, Antigravity and four more agents. Every number here comes from committed raw transcripts, including the runs where it lost.
 
 <p align="center">
-  <img src="assets/benchmark-claude.svg" width="820" alt="Claude Code coding prompts, 14 cells on Haiku 4.5, tools off, as percent of the same model with no ruleset. Answer length: caveman 57%, ponytail 47%, Chisle 52%. Billed tokens: caveman 69%, ponytail 154%, Chisle 79%.">
+  <img src="assets/benchmark-pi.svg" width="820" alt="Pi benchmark, 6 tasks on GPT-5.5, answer length as percent of the same model with no ruleset. caveman 56%, ponytail 49%, Chisle 37%.">
 </p>
 
-<p align="center"><sub>Claude Code 2.1.285 on Haiku 4.5, tools off, the 14 coding cells of a 26-cell run. All three rulesets shorten answers by a similar amount. Across all 26 prompts Chisle bills 82%, caveman 81% and ponytail 127%; on short answers every ruleset costs more than none. <a href="#benchmarks">Full numbers below.</a></sub></p>
+<p align="center"><sub>Pi 0.85.1 on GPT-5.5, 6 tasks, one run: the answer the user reads. On total billed tokens ponytail edges Chisle there, 59% to 61%. On Claude Code (Haiku 4.5, 26 cells, tools off) Chisle bills 82%, caveman 81% and ponytail 127%; on short answers every ruleset costs more than none. <a href="#benchmarks">Full numbers below.</a></sub></p>
 
 ---
 
@@ -148,10 +148,6 @@ Upgrading, per-agent setup, `--stats` and config: [docs/usage.md](docs/usage.md)
 
 Claude Code 2.1.285 on Haiku 4.5, 13 live prompts × 2 seeds = 26 cells per arm, tools off, billed output tokens vs the same model with no ruleset ([writeup + raw cells](benchmarks/results/2026-10-12-tools-off-rerun.md)). This replaces the 2026-10-01 run, which left Claude Code's tools on ([#37](https://github.com/JayPokale/Chisle/issues/37)):
 
-<p align="center">
-  <img src="assets/benchmark-rerun.svg" width="820" alt="2026-10-12 tools-off rerun: total billed output as percent of the bare model. caveman 81%, ponytail 127%, Chisle 82%.">
-</p>
-
 | | total bill | 95% CI | visible answer | worst cell | backfires |
 |---|--:|--:|--:|--:|--:|
 | caveman | 81% | 63–105% | 65% | 339% | 13 / 26 |
@@ -160,15 +156,11 @@ Claude Code 2.1.285 on Haiku 4.5, 13 live prompts × 2 seeds = 26 cells per arm,
 
 All three shorten the visible answer by a similar amount; the intervals overlap. On the bill Chisle and caveman tie, and neither is clearly below a bare model. ponytail bills more because its reasoning grows almost 5×. Every ruleset costs more than none on short answers.
 
-On Pi + GPT-5.5 Chisle gives the shortest answers, 37% the length of a bare model's (caveman 56%, ponytail 49%), though on total billed tokens ponytail edges it, 59% to 61%:
-
-<p align="center">
-  <img src="assets/benchmark-pi.svg" width="820" alt="Pi benchmark, 6 tasks on GPT-5.5, as percent of the same model with no ruleset. Answer length: caveman 56%, ponytail 49%, Chisle 37%. Billed tokens: caveman 72%, ponytail 59%, Chisle 61%.">
-</p>
+On Pi + GPT-5.5 (chart at the top) Chisle gives the shortest answers, 37% the length of a bare model's (caveman 56%, ponytail 49%), though on total billed tokens ponytail edges it, 59% to 61% (caveman 72%).
 
 **Input side:** tool output is 67.5% of context in 171 measured Claude Code sessions, and it is re-billed on every later request. The compressor cut ~46% off every eligible output there, and 27.4% of tool output on top of Pi's own truncation ([receipts](benchmarks/results/2026-07-07-input-axis.md)).
 
-Every table, chart and caveat, including the June suite and the Pi run in full: [docs/benchmarks.md](docs/benchmarks.md). Head to head: [docs/comparison.md](docs/comparison.md).
+Every table and caveat, including the June suite and the Pi run in full: [docs/benchmarks.md](docs/benchmarks.md). Head to head: [docs/comparison.md](docs/comparison.md).
 
 ---
 

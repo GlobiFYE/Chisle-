@@ -42,7 +42,7 @@ plugin cache. Raw model outputs are committed under `results/raw*/` for audit.
 bash benchmarks/run-live.sh [model] [raw-dir]                 # Claude Code
 HARNESS=pi bash benchmarks/run-live.sh [model] [raw-dir]      # Pi; keeps raw JSONL + normalized JSON
 node benchmarks/aggregate.js                                  # comparison tables (RAW_DIR= for a fresh dir)
-node scripts/build-chart.js                        # regenerate assets/benchmark.svg from all raw dirs
+node scripts/build-chart.js                        # regenerate assets/benchmark-pi.svg from raw-pi/
 ```
 
 Committed suites: `results/raw/` (June, Haiku), `results/raw-sonnet/` (June,

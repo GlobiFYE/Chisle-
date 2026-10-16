@@ -6,15 +6,22 @@ import Reveal from "./Reveal";
 import SectionHead from "./SectionHead";
 import samples from "@/data/samples.json";
 
+// The one chart: visible answer on the Pi suite (6 tasks, Pi 0.85.1 +
+// openai-codex/gpt-5.5), as % of the bare model. Matches assets/benchmark-pi.svg.
+const ARMS = [
+  { name: "chisle", pct: 37, self: true, note: "shortest" },
+  { name: "ponytail", pct: 49, note: "" },
+  { name: "caveman", pct: 56, note: "" },
+  { name: "bare model", pct: 100, note: "baseline" },
+];
+const MAX_PCT = 100;
 // From benchmarks/results/2026-10-12-tools-off-rerun.md: 13 live prompts x 2
 // seeds, billed output tokens, tools off, shipped ruleset and rival versions.
-const ARMS = [
-  { name: "caveman", pct: 81, note: "worst cell 339%" },
-  { name: "chisle", pct: 82, self: true, note: "worst cell 194%" },
-  { name: "bare model", pct: 100, note: "baseline" },
-  { name: "ponytail", pct: 127, note: "worst cell 493%" },
+const RERUN_ROWS = [
+  { name: "caveman", bill: "81%", ci: "63–105%", answer: "65%", worst: "339%", backfires: "13 / 26" },
+  { name: "ponytail", bill: "127%", ci: "102–155%", answer: "58%", worst: "493%", backfires: "18 / 26" },
+  { name: "chisle", bill: "82%", ci: "67–104%", answer: "56%", worst: "194%", backfires: "12 / 26", self: true },
 ];
-const MAX_PCT = Math.max(...ARMS.map((a) => a.pct));
 
 // Generated from every committed cell by scripts/build-samples.js. Two
 // metrics, because they answer different questions: tokens is the bill, lines
@@ -53,11 +60,10 @@ export default function Benchmarks() {
   return (
     <section id="numbers" className="border-y border-line bg-surface py-28">
       <div className="mx-auto max-w-6xl px-5">
-        <SectionHead eyebrow="Benchmarks" title="The bill, re-measured">
-          Four arms, 13 live prompts × 2 seeds, same model, isolated configs, billed output
-          tokens as a share of the bare model. Re-run on 2026-10-01 with the shipped ruleset,
-          after the June headline of 52% turned out to lean on one outlier baseline. Raw
-          transcripts and the runner{" "}
+        <SectionHead eyebrow="Benchmarks" title="The answer you read, measured">
+          Six tasks on Pi 0.85.1 with GPT-5.5, one run: the visible answer as a share of the
+          same model with no ruleset. The bill is a closer race; every number, including the
+          rows Chisle loses, is in the tables below. Raw transcripts and the runner{" "}
           <a
             href="https://github.com/JayPokale/Chisle/tree/main/benchmarks"
             className="text-accent underline underline-offset-4"
@@ -91,7 +97,38 @@ export default function Benchmarks() {
         </div>
 
         <Reveal delay={0.1}>
-          <p className="mt-8 text-xs text-dim">
+          <h3 className="mt-16 text-lg font-semibold tracking-tight">The bill on Claude Code</h3>
+          <p className="mt-2 max-w-xl text-sm text-dim">
+            13 live prompts × 2 seeds on Haiku 4.5, tools off, billed output tokens as a share of
+            the bare model (re-run 2026-10-12).
+          </p>
+          <div className="mt-6 overflow-x-auto rounded-xl border border-line bg-bg">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-line text-left text-dim">
+                  <th className="py-2 pl-4 pr-4 font-medium" />
+                  <th className="py-2 pr-4 text-right font-medium">total bill</th>
+                  <th className="py-2 pr-4 text-right font-medium">95% CI</th>
+                  <th className="py-2 pr-4 text-right font-medium">visible answer</th>
+                  <th className="py-2 pr-4 text-right font-medium">worst cell</th>
+                  <th className="py-2 pr-4 text-right font-medium">backfires</th>
+                </tr>
+              </thead>
+              <tbody>
+                {RERUN_ROWS.map((r) => (
+                  <tr key={r.name} className={`border-b border-line last:border-0 ${r.self ? "font-semibold" : ""}`}>
+                    <td className="py-2 pl-4 pr-4">{r.name}</td>
+                    <td className="py-2 pr-4 text-right">{r.bill}</td>
+                    <td className="py-2 pr-4 text-right">{r.ci}</td>
+                    <td className="py-2 pr-4 text-right">{r.answer}</td>
+                    <td className="py-2 pr-4 text-right">{r.worst}</td>
+                    <td className="py-2 pr-4 text-right">{r.backfires}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-4 text-xs text-dim">
             95% intervals: Chisle 67–104%, caveman 63–105%, ponytail 102–155%. Chisle and caveman
             tie, and neither is clearly below a bare model; ponytail&apos;s answers are short but
             its reasoning grows almost 5×. A single cell says little: the bare model beats itself

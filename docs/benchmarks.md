@@ -8,10 +8,6 @@ Nothing here is estimated. Every figure below is recomputed from committed raw d
 
 Claude Code 2.1.285, caveman `ef6050c5e184`, ponytail 4.8.3: 13 live prompts × 2 seeds = 26 single-turn cells per arm on Haiku 4.5, billed output tokens vs the no-tool baseline ([writeup + raw cells](../benchmarks/results/2026-10-12-tools-off-rerun.md)). The 2026-10-01 run of the same prompts left Claude Code's tools on: in 14 of 26 prompts an arm tried `Write`/`Bash`, was denied and wrote the code again, so it is withdrawn ([#37](https://github.com/JayPokale/Chisle/issues/37), [old writeup](../benchmarks/results/2026-10-01-live-rerun.md)).
 
-<p align="center">
-  <img src="../assets/benchmark-rerun.svg" width="820" alt="2026-10-12 tools-off rerun: total billed output as percent of the bare model. caveman 81%, ponytail 127%, Chisle 82%.">
-</p>
-
 | | total bill | 95% CI | visible answer | worst cell | backfires |
 |---|--:|--:|--:|--:|--:|
 | caveman | 81% | 63–105% | 65% | 339% | 13 / 26 |
@@ -41,11 +37,7 @@ All three shorten the visible answer by a similar amount (56–65%, overlapping 
 
 Chisle wins all four columns: it cut the total 20-task bill **nearly in half** while the specialists managed 20–32%, and it did so with the smallest worst day and a twentieth the backfire rate.
 
-<p align="center">
-  <img src="../assets/benchmark.svg" width="820" alt="Total billed output across 20 tasks as percent of the no-tool baseline. caveman 80% (worst day 424%, backfired 6), ponytail 68% (worst day 227%, backfired 8), Chisle 52% (worst day 173%, backfired 1, root-caused and fixed).">
-</p>
-
-The bar is the whole 20-task bill; the badge is each tool's worst single day. caveman's worst day cost **4.2×** a bare model; ponytail's, a tool whose entire job is writing less, **2.3×**. Chisle's worst day was 1.7×, it happened once, and the fix is measured and merged.
+The worst-case column is each tool's worst single day. caveman's worst day cost **4.2×** a bare model; ponytail's, a tool whose entire job is writing less, **2.3×**. Chisle's worst day was 1.7×, it happened once, and the fix is measured and merged.
 
 In the July run all 24 answers, every arm, **graded correct**: nobody here buys token savings with wrong answers.
 
@@ -68,19 +60,25 @@ This does revise a claim the earlier Sonnet writeup made. On that suite's three 
 
 Averages hide the interesting part, so here is every cell of the June suite, same six prompts, every arm, no cherry-picking:
 
-<p align="center">
-  <img src="../assets/per-task.svg" width="820" alt="Billed output per task as a percent of the no-tool baseline across the six-task June suite: Chisle is leanest on five of six, caveman wins the cache task at 8% versus Chisle's 12%.">
-</p>
+| task | kind | caveman | ponytail | **Chisle** |
+|---|---|--:|--:|--:|
+| auth-bug | code | 80% | 76% | **67%** |
+| cache | code | **8%** | 16% | 12% |
+| debounce | code | 88% | 53% | **40%** |
+| pooling | prose | 93% | 119% | **74%** |
+| regex-concept | prose | 130% | 113% | **74%** |
+| rest-graphql | prose | 89% | 112% | **71%** |
 
-Chisle is leanest on **5 of 6**. caveman takes `cache` (8% vs our 12%) by answering in prose where we still emit working code, which is the trade you would want on a task that asked for code. Note the two prose rows where ponytail lands **above** 100%: a tool built to write less made the model write *more* than using no tool at all. That is the failure mode the worst-case column above is really about.
+Chisle is leanest on **5 of 6**. caveman takes `cache` (8% vs our 12%) by answering in prose where we still emit working code, which is the trade you would want on a task that asked for code. Note the three prose rows where ponytail lands **above** 100%: a tool built to write less made the model write *more* than using no tool at all. That is the failure mode the worst-case column above is really about.
 
 ### The headline average is hiding the good part
 
 Split the same 20 cells at their median baseline, short answers below and long answers above, and the tools separate sharply:
 
-<p align="center">
-  <img src="../assets/by-size.svg" width="820" alt="Total billed output split by answer size. On short answers caveman and Chisle are level at about 84% of baseline and ponytail is above 100%. On long answers Chisle drops to about 45% while caveman is 79% and ponytail 59%.">
-</p>
+| | caveman | ponytail | **Chisle** |
+|---|--:|--:|--:|
+| short answers | 84% | 106% | 84% |
+| long answers | 79% | 59% | **45%** |
 
 On **short** answers Chisle and caveman are level (84% each), because there is not much to cut in a three-line reply, and the ruleset overhead is proportionally at its worst. On **long** answers Chisle drops to **45%** while caveman only reaches 79%. The 52% headline is the blend of the two, so it understates the case where it matters and overstates the case where it doesn't.
 
@@ -98,10 +96,6 @@ Coding prompts average ~1129 baseline tokens against ~393 for explanation prompt
 | coding · long | 7 | 76% | 52% | **41%** |
 | non-coding · short | 5 | 104% | 98% | **96%** |
 | non-coding · long | 3 | 103% | 111% | **77%** |
-
-<p align="center">
-  <img src="../assets/by-kind.svg" width="820" alt="Billed output by task kind crossed with answer size. Code and short: caveman 62%, ponytail 116%, Chisle 70%. Code and long: caveman 76%, ponytail 52%, Chisle 41%. Explanation and short: caveman 104%, ponytail 98%, Chisle 96%. Explanation and long: caveman 103%, ponytail 111%, Chisle 77%.">
-</p>
 
 Size matters *within* each kind: coding goes 70% → 41% and non-coding 96% → 77%, so it isn't merely code in disguise. But the cells are thin, and the non-coding "long" bucket spans only 522–542 tokens, which is barely long at all.
 
