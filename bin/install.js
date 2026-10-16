@@ -7,6 +7,7 @@
 //   - Pi           → Pi package (extension + skill)
 //   - Gemini CLI   → gemini extensions install
 //   - Codex        → fenced ruleset appended to ~/.codex/AGENTS.md
+//   - Copilot CLI  → fenced ruleset + postToolUse compression hook in ~/.copilot
 //   - OpenCode     → fenced ruleset + skills + plugin in its global config root
 //   - Hermes       → skills copy in ~/.hermes/skills (Agent Skills standard)
 //   - Cursor/Windsurf/Cline/Kiro/Copilot/Antigravity → project rule file dropped into CWD
@@ -17,6 +18,7 @@
 //   npx chisle --only claude   install for one agent
 //   npx chisle --dry-run       print actions, change nothing
 //   npx chisle --uninstall     remove what we installed
+//   npx chisle mcp wrap        route stdio MCP servers through the compressor
 //   npx chisle --help
 //
 // Pure stdlib, zero runtime deps.
@@ -29,6 +31,7 @@ const path = require('path');
 const cp = require('child_process');
 
 const SETTINGS = require('./lib/settings');
+const MCP = require('./lib/mcp');
 const { getOpencodeDir, getOpencodeStateDir } = require('../hooks/chisle-config');
 
 const REPO = 'JayPokale/Chisle';
@@ -46,6 +49,7 @@ const PROVIDERS = [
   { id: 'pi',       label: 'Pi',            scope: 'global',  detect: 'cmd:pi' },
   { id: 'gemini',   label: 'Gemini CLI',    scope: 'global',  detect: 'cmd:gemini' },
   { id: 'codex',    label: 'Codex CLI',     scope: 'global',  detect: 'cmd:codex||dir:~/.codex' },
+  { id: 'copilot-cli', label: 'Copilot CLI', scope: 'global',  detect: 'cmd:copilot' },
   { id: 'opencode', label: 'OpenCode',        scope: 'global',  detect: 'cmd:opencode' },
   { id: 'hermes',   label: 'Hermes Agent',    scope: 'global',  detect: 'cmd:hermes||dir:~/.hermes' },
   { id: 'cursor',   label: 'Cursor',        scope: 'project', detect: 'cmd:cursor||dir:~/.cursor',
@@ -195,6 +199,8 @@ function claudeDir(opts) {
 function homeDir() { return process.env.CHISLE_HOME || os.homedir(); }
 
 function opencodeDir() { return getOpencodeDir({ home: homeDir() }); }
+// Copilot CLI reads hooks, instructions and MCP config under COPILOT_HOME.
+function copilotDir() { return process.env.COPILOT_HOME || path.join(homeDir(), '.copilot'); }
 function opencodeStateDir() { return getOpencodeStateDir({ home: homeDir() }); }
 
 // ── what is already installed ───────────────────────────────────────────────
@@ -241,6 +247,8 @@ function installedFor(id, opts) {
       }
       case 'hermes':
         return fs.existsSync(path.join(homeDir(), '.hermes', 'skills', 'chisle', 'SKILL.md'));
+      case 'copilot-cli':
+        return fs.existsSync(path.join(copilotDir(), 'hooks', 'chisle.json'));
       default: {
         const prov = PROVIDERS.find(x => x.id === id);
         return !!(prov && prov.rule && fs.existsSync(path.join(process.cwd(), prov.rule)));
@@ -585,6 +593,65 @@ function installOpencode(ctx) {
   process.stdout.write('\n');
 }
 
+// ── Copilot CLI ─────────────────────────────────────────────────────────────
+// Rules: fenced block in ~/.copilot/copilot-instructions.md, Copilot CLI's
+// user-level instructions file. Input axis: a user-level postToolUse hook
+// (~/.copilot/hooks/chisle.json, no workspace admission needed) running the
+// shared compressor, which already speaks Copilot's camelCase payload and
+// answers with modifiedResult. Verified live on Copilot CLI 1.0.95: a
+// 13.9k-char shell result reached the model at ~100 lines with the mid-log
+// error line and the `<shellId: 0 completed with exit code 0>` tail intact.
+function copilotHookConfig(hookPath) {
+  return JSON.stringify({
+    version: 1,
+    hooks: {
+      postToolUse: [{
+        type: 'command',
+        bash: 'node "' + hookPath + '"',
+        powershell: 'node "' + hookPath + '"',
+        timeoutSec: 10,
+      }],
+    },
+  }, null, 2) + '\n';
+}
+
+function installCopilotCli(ctx) {
+  const { say, note, opts, results } = ctx;
+  results.detected++;
+  say('\u2192 Copilot CLI detected');
+  const root = copilotDir();
+  const rules = path.join(root, 'copilot-instructions.md');
+  const hooksDir = path.join(root, 'chisle-hooks');
+  const hookFile = path.join(root, 'hooks', 'chisle.json');
+
+  if (opts.dryRun) {
+    note('  would write chisle ruleset to ' + rules);
+    note('  would copy compressor to ' + hooksDir);
+    note('  would write postToolUse hook ' + hookFile);
+    results.installed.push('copilot-cli');
+    process.stdout.write('\n');
+    return;
+  }
+
+  try {
+    const st = writeFencedRuleset(rules, opts, note);
+    fs.mkdirSync(hooksDir, { recursive: true });
+    for (const f of ['chisle-compress-output.js', 'chisle-config.js']) {
+      fs.copyFileSync(path.join(REPO_ROOT, 'hooks', f), path.join(hooksDir, f));
+    }
+    fs.writeFileSync(path.join(hooksDir, 'package.json'), '{ "type": "commonjs" }\n');
+    const hookExisted = fs.existsSync(hookFile);
+    if (!hookExisted || opts.force) {
+      fs.mkdirSync(path.dirname(hookFile), { recursive: true });
+      fs.writeFileSync(hookFile, copilotHookConfig(path.join(hooksDir, 'chisle-compress-output.js')), { mode: 0o644 });
+      process.stdout.write('  installed: ' + hookFile + '\n');
+    }
+    if (st === 'installed' || !hookExisted) results.installed.push('copilot-cli');
+    else results.skipped.push(['copilot-cli', 'already present; compressor refreshed']);
+  } catch (e) { results.failed.push(['copilot-cli', (e && e.message) || 'write failed']); }
+  process.stdout.write('\n');
+}
+
 // ── Hermes ──────────────────────────────────────────────────────────
 // Agent-Skills host: bundled skills land verbatim in ~/.hermes/skills, where
 // Hermes discovers them as /chisle slash commands. No ruleset is injected:
@@ -737,6 +804,36 @@ function uninstall(ctx) {
     if (hGone > 0) { note('  removed ' + hGone + ' chisle skill dir(s) from ' + hSkills); touched++; }
   }
 
+  if (wants('copilot-cli')) {
+    const cpRoot = copilotDir();
+    const cpMd = path.join(cpRoot, 'copilot-instructions.md');
+    if (fs.existsSync(cpMd)) {
+      const txt = fs.readFileSync(cpMd, 'utf8');
+      const b = txt.indexOf(FENCE_BEGIN);
+      const e = b === -1 ? -1 : txt.indexOf(FENCE_END, b);
+      if (b !== -1 && e !== -1) {
+        const tail = txt.slice(e + FENCE_END.length).replace(/^\n/, '');
+        const stripped = (txt.slice(0, b) + tail).replace(/\n{3,}/g, '\n\n').replace(/\n{2,}$/, '\n');
+        if (!opts.dryRun) fs.writeFileSync(cpMd, stripped, { mode: 0o644 });
+        note('  removed chisle block from ' + cpMd); touched++;
+      }
+    }
+    for (const rel of [path.join('hooks', 'chisle.json'), 'chisle-hooks', 'chisle-spill', 'chisle-dedup',
+                       '.chisle-compress-stats.json']) {
+      const p = path.join(cpRoot, rel);
+      if (fs.existsSync(p)) { if (!opts.dryRun) fs.rmSync(p, { recursive: true, force: true }); note('  removed ' + p); touched++; }
+    }
+  }
+
+  // MCP servers routed through the proxy by `npx chisle mcp wrap`: restore
+  // their original commands before anything else could remove the proxy.
+  if (!opts.only.length) {
+    const r = MCP.run(['unwrap'].concat(opts.dryRun ? ['--dry-run'] : []), () => {});
+    if (r.changed) { note('  restored ' + r.changed + ' MCP server command(s) wrapped by `chisle mcp wrap`'); touched++; }
+    const pd = MCP.proxyDir();
+    if (fs.existsSync(pd)) { if (!opts.dryRun) fs.rmSync(pd, { recursive: true, force: true }); note('  removed ' + pd); touched++; }
+  }
+
   if (!opts.only.length || opts.only.some(id => PROVIDERS.find(p => p.id === id).scope === 'project')) {
     note('');
     note('Project-scoped rule files (.cursor/, .windsurf/, .clinerules/, .kiro/, .agents/rules/, .github/copilot-instructions.md)');
@@ -759,18 +856,26 @@ Flags:
   --only <id>      Limit install/uninstall to one agent (repeatable)
   --dry-run        Print actions, change nothing
   --force          Reinstall / overwrite even if already present
-  --uninstall, -u  Remove what chisle installed
+  --uninstall, -u  Remove what chisle installed (also restores wrapped MCP servers)
   --config-dir <p> Override Claude config dir (default: $CLAUDE_CONFIG_DIR or ~/.claude)
   --no-color       Disable ANSI color
   --help, -h       This help
 
 Agents: ${PROVIDERS.map(p => p.id).join(', ')}
 
+MCP output compression (opt-in, any agent that launches stdio MCP servers):
+  npx chisle mcp wrap   [--only <id>] [--file <mcp.json>] [--dry-run]
+  npx chisle mcp unwrap [--only <id>] [--file <mcp.json>] [--dry-run]
+  npx chisle mcp status
+  Targets: ${[...new Set(MCP.targets().map(t => t.id))].join(', ')}. Never Claude Code
+  (its own hook already compresses MCP output).
+
 Examples:
   npx chisle                  # auto-detect + install
   npx chisle --only claude    # just Claude Code
   npx chisle --dry-run        # preview
   npx chisle --stats          # what the compressor has saved
+  npx chisle mcp wrap         # compress MCP tool output in Cursor, Gemini, ...
   npx chisle@latest --update  # upgrade what is already installed
 `);
 }
@@ -782,8 +887,9 @@ Examples:
 // without the ruleset, which is what the benchmark arms are for. A counter that
 // blended the two would be inventing the interesting half.
 function printStats(c, opts) {
-  const dir = opts.only.length === 1 && opts.only[0] === 'opencode'
-    ? opencodeStateDir()
+  const only = opts.only.length === 1 ? opts.only[0] : null;
+  const dir = only === 'opencode' ? opencodeStateDir()
+    : only === 'copilot-cli' ? copilotDir()
     : claudeDir(opts);
   const p = path.join(dir, '.chisle-compress-stats.json');
   process.stdout.write(c.orange('chisle') + ': tool-output savings\n\n');
@@ -829,6 +935,7 @@ function printList(c) {
 
 // ── main ────────────────────────────────────────────────────────────────────
 function main() {
+  if (process.argv[2] === 'mcp') return MCP.main(process.argv.slice(3));
   const opts = parseArgs(process.argv.slice(2));
   const c = makeChalk(opts.noColor);
 
@@ -870,6 +977,7 @@ function main() {
     else if (p.id === 'codex') installCodex(ctx);
     else if (p.id === 'opencode') installOpencode(ctx);
     else if (p.id === 'hermes') installHermes(ctx);
+    else if (p.id === 'copilot-cli') installCopilotCli(ctx);
     else installProjectRule(ctx, p);
   }
 

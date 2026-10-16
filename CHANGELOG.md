@@ -5,6 +5,10 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- **Copilot CLI as a global agent.** `npx chisle --only copilot-cli` writes the ruleset into `~/.copilot/copilot-instructions.md` and registers the existing compressor as a user-level `postToolUse` hook (`~/.copilot/hooks/chisle.json`). Verified live on Copilot CLI 1.0.95: a 13.9k-char shell result reached the model at ~100 lines, mid-log error and exit-code tail intact. Copilot compression now follows `CHISLE_DEFAULT_MODE` / the shared config instead of being unconditionally on. `--stats --only copilot-cli` reads its ledger.
+- **MCP output compression for any agent.** `npx chisle mcp wrap` routes stdio MCP servers in Cursor, Windsurf, Cline, Kiro, Gemini CLI, Qwen Code and Copilot CLI through `hooks/chisle-mcp-proxy.js`, which compresses oversized `tools/call` results with the shared core and forwards every other byte unchanged. Opt-in, strict-JSON only, backup on first write, never touches Claude Code; `mcp unwrap`, `mcp status`, and `--uninstall` reverse it. Verified live in Copilot CLI: 27,734 chars saved on one call, answer unchanged.
+
 ### Fixed
 - **OpenCode install follows OpenCode's config root.** Install, detection, update, uninstall, plugin state and `--stats --only opencode` now resolve `OPENCODE_CONFIG_DIR`, then `$XDG_CONFIG_HOME/opencode`, then `~/.config/opencode`. Previously the installer always wrote `~/.config/opencode` while the plugin honored `XDG_CONFIG_HOME`. (#33)
 - **Spill, dedup and stats writes are symlink-safe and atomic** for every agent sharing the compressor core. Subdirectories Chisle creates and the files it writes must not be links; a symlinked state root (e.g. dotfiles via GNU stow) is still accepted. (#33)

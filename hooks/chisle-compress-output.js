@@ -55,7 +55,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { getClaudeDir, getCopilotDir, getOpencodeStateDir, readFlag } = require('./chisle-config');
+const { getClaudeDir, getCopilotDir, getOpencodeStateDir, readFlag, getDefaultMode } = require('./chisle-config');
 
 // One threshold. Env overrides all.
 // These are the values the old 'full' level used — the default,
@@ -682,9 +682,10 @@ function main() {
 
       // Copilot has no /chisle mode-toggle mechanism (no UserPromptSubmit
       // hook wired for it yet, so there is nothing to flip a flag file with):
-      // treat it as always-on, matching the always-on ruleset it already
-      // gets. Claude/Pi keep reading the real flag file exactly as before.
-      const mode = copilot ? 'on' : readFlag(path.join(getClaudeDir(), '.chisle-active'));
+      // it follows the default mode (CHISLE_DEFAULT_MODE or the shared
+      // config, 'on' when unset), like OpenCode. Claude/Pi keep reading the
+      // real flag file exactly as before.
+      const mode = copilot ? getDefaultMode() : readFlag(path.join(getClaudeDir(), '.chisle-active'));
 
       const updated = processPayload(payload, mode);
       if (updated == null) return;

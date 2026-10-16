@@ -16,6 +16,8 @@ to every agent that supports a rules/context file. One source, many targets.
 | Claude Code | `.claude-plugin/plugin.json` + `skills/` + `hooks/` | plugin |
 | Pi | `package.json#pi` → `pi-extension/` + `skills/` | Pi package |
 | Codex | `.codex-plugin/plugin.json` → `AGENTS.md` | AGENTS.md |
+| Copilot CLI | `~/.copilot/copilot-instructions.md` (fenced block) + `~/.copilot/hooks/chisle.json` | instructions + `postToolUse` hook |
+| Any stdio MCP host (opt-in) | `chisle mcp wrap` → `<config>/chisle/mcp-proxy/` | MCP proxy |
 | Gemini | `gemini-extension.json` → `GEMINI.md` | context file |
 | Cursor | `.cursor/rules/chisle.mdc` | MDC, `alwaysApply: true` |
 | Windsurf | `.windsurf/rules/chisle.md` | `trigger: always_on` |
@@ -50,6 +52,32 @@ Verified against OpenCode 1.18.x docs (rules + Agent Skills pages) and OpenCode 
 - Both hooks reuse the Claude/Pi compressor core. Eligible output has a final character bound, Unicode-safe head/tail cuts, bounded error windows, and a byte-identical pre-scrub recovery spill. Per-session dedup uses OpenCode's session and call IDs. A bounded output already carrying `[chisle:` is skipped; an oversized source string containing that text is still bounded. Non-string output shapes are skipped.
 - The default allowlist contains only known read-heavy OpenCode built-ins. MCP names are never inferred safe from underscores; add known read-only tools with `CHISLE_COMPRESS_TOOLS`. Source-bearing and mutating tools remain excluded even when configured. Disable compression with `CHISLE_COMPRESS=0` or `CHISLE_DEFAULT_MODE=off`. Measured on gpt-5.5, a 30 KB `cat` output kept full by OpenCode dropped the tool-ingestion step from 13,382 to 1,747 fresh input tokens (-87%) with an identical, correct answer.
 
+## Copilot CLI delivery
+
+Verified live on Copilot CLI 1.0.95 with a scratch `COPILOT_HOME`:
+
+- User-level hooks in `~/.copilot/hooks/*.json` run without workspace admission. `postToolUse` receives `{ toolName, toolArgs, toolResult: { resultType, textResultForLlm } }`; replying `{ modifiedResult: { resultType, textResultForLlm } }` replaces what the model sees.
+- Shell results end with `<shellId: N completed with exit code N>`, which the tail keeps. A 13,932-char `seq` result reached the model at ~100 lines; it still reported the mid-log `ERROR` line, the last line, and exit code 0.
+- MCP tool names do not match the Copilot allowlist, so MCP output is left to the proxy below.
+- No mode toggle exists; compression follows `CHISLE_DEFAULT_MODE` / the shared config, like OpenCode.
+
+## MCP proxy (hosts without a rewrite hook)
+
+`hooks/chisle-mcp-proxy.js` sits between host and a stdio MCP server. Host→server bytes are forwarded unchanged while `tools/call` ids are noted; server→host lines are forwarded unchanged except responses to those ids, whose `content[]` text blocks go through `transform` (scrub + elide + spill). Verified live in Copilot CLI 1.0.95: a 32k-char tool result reached the model at ~1.4k with the mid-log error line intact (27,734 chars saved).
+
+- No dedup: one server process can serve several chats, and a new chat never saw the earlier copy.
+- Tool names matching `read|view|file|edit|write|patch|replace|insert` are never compressed; `structuredContent` is untouched.
+- Spill and stats live in `CHISLE_STATE_DIR` or `~/.config/chisle`.
+
+Hosts checked and why they need the proxy (October 2026 docs/source):
+
+| Host | Post-tool rewrite? | Notes |
+|------|--------------------|-------|
+| Codex | no clean one | `PostToolUse` `continue:false`/`block` replaces the result, but exec results reach the hook without the `Process exited with code N` header, so a replacement would hide failures. MCP via proxy needs a manual TOML edit. |
+| Gemini CLI | no | `AfterTool` deny replaces the result as `Tool result blocked: …` with an error flag; `BeforeModel` cannot touch function responses. |
+| Cursor | MCP only | `postToolUse.updated_mcp_tool_output`; shell hooks are observational. |
+| Windsurf, Cline, Factory Droid, Qwen Code, Kiro | no | Observational hooks, or context injection only. |
+
 ## Hermes delivery
 
 Verified against the Hermes skills docs (`~/.hermes/skills/` as source of truth, Agent Skills standard):
@@ -71,12 +99,12 @@ and `git clone` installs work without a build step.
 
 ## Runtime feature map
 
-| Feature | Claude Code | Pi | OpenCode | Other static-rule |
-|---------|:-----------:|:--:|:--------:|:-----------------:|
-| Always-on output rules | ✅ | ✅ | ✅ | ✅ |
-| Tool-result compression | ✅ | ✅ | ✅ (plugin) | ❌ |
-| `/chisle` on-demand skill | ✅ | ✅ | ✅ (skills) | ❌ (static ruleset only) |
-| `/chisle` + natural-language toggle | ✅ | ✅ | ❌ (env/config) | ❌ |
-| Status badge + measured savings | ✅ | ✅ | ✅ (`--stats`) | ❌ |
+| Feature | Claude Code | Pi | OpenCode | Copilot CLI | Other static-rule |
+|---------|:-----------:|:--:|:--------:|:-----------:|:-----------------:|
+| Always-on output rules | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Tool-result compression | ✅ | ✅ | ✅ (plugin) | ✅ (hook) | MCP only (`chisle mcp wrap`) |
+| `/chisle` on-demand skill | ✅ | ✅ | ✅ (skills) | ❌ | ❌ (static ruleset only) |
+| `/chisle` + natural-language toggle | ✅ | ✅ | ❌ (env/config) | ❌ (env/config) | ❌ |
+| Status badge + measured savings | ✅ | ✅ | ✅ (`--stats`) | ✅ (`--stats`) | `mcp status` |
 
 Pi's `tool_result` event enables the second input-axis implementation. It patches `content` only, preserving tool-specific `details`, `isError`, and `usage`. `read`, `edit`, and `write` remain excluded. Project-local Pi resources require project trust and extensions run with full user permissions; see [installation](../INSTALL.md#manual-pi-package).

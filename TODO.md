@@ -37,7 +37,13 @@ Still open:
       `/chisle`, and the status badge. Marginal replay after Pi's native
       truncation saved 27.4% of persisted tool-output chars. Cursor / Windsurf /
       Cline / Codex still lack a post-tool rewrite hook; Context Diet remains
-      their prevention layer.
+      their prevention layer, and `chisle mcp wrap` (2026-10-16) covers their
+      MCP output. Copilot CLI got the hook wiring the same day.
+- [ ] Codex shell output: `PostToolUse` can replace a result but the hook
+      payload lacks the exit-code header, so replacing would hide failures.
+      Revisit when Codex passes exit status or ships `updatedToolOutput`.
+- [ ] Gemini CLI: `AfterTool` can only replace via deny (error-flagged).
+      Ask upstream for a non-error replacement field.
 - [ ] Adversarial correctness benchmark for eliding, same bar as the output
       axis's 0/14: N real debugging tasks where the needed line was in an
       elided region, did the agent recover? **Narrowed 2026-10-01:** failing

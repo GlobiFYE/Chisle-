@@ -14,6 +14,7 @@ Detects supported agents and installs Chisle for each:
 | Pi | package containing extension + skill | global |
 | Gemini CLI | Gemini extension | global |
 | Codex | fenced ruleset in `~/.codex/AGENTS.md` | global |
+| Copilot CLI | fenced ruleset in `~/.copilot/copilot-instructions.md` + `postToolUse` compression hook | global |
 | OpenCode | fenced ruleset + skills + compression plugin under the configured OpenCode root | global |
 | Hermes Agent | skills in `~/.hermes/skills` (Agent Skills standard, `/chisle` commands) | global |
 | Cursor / Windsurf / Cline / Kiro / Copilot / Antigravity | rule file in current project | project |
@@ -106,6 +107,49 @@ standard), where Hermes discovers them as `/chisle` slash commands. No ruleset
 is injected and no config file is rewritten: Hermes already reads project
 `AGENTS.md`, which carries the always-on axis when the repo ships it.
 
+## Manual Copilot CLI
+
+```bash
+npx chisle --only copilot-cli
+```
+
+Writes the ruleset into `~/.copilot/copilot-instructions.md` (fenced, your own
+instructions kept), copies the compressor to `~/.copilot/chisle-hooks/`, and
+registers it as a user-level `postToolUse` hook in `~/.copilot/hooks/chisle.json`.
+Oversized `bash`/`grep`/`glob`/web/`task` results are compressed;
+`view`/`create`/`edit` never are. Honors `COPILOT_HOME`. Savings:
+`npx chisle --stats --only copilot-cli`.
+
+## MCP output compression (any agent)
+
+Agents whose hooks cannot rewrite a tool result (Cursor, Windsurf, Cline, Kiro,
+Gemini CLI, Qwen Code) still launch stdio MCP servers from a command line.
+`chisle mcp wrap` routes those servers through a small proxy that compresses
+oversized `tools/call` results with the same core and passes every other byte
+through unchanged:
+
+```bash
+npx chisle mcp wrap            # every MCP config found below
+npx chisle mcp wrap --only cursor
+npx chisle mcp wrap --file ./.cursor/mcp.json   # a project-level file
+npx chisle mcp status          # wrapped servers + chars saved
+npx chisle mcp unwrap          # restore original commands
+```
+
+Covers `~/.cursor/mcp.json`, `~/.codeium/windsurf/mcp_config.json`,
+`~/.gemini/settings.json`, `~/.qwen/settings.json`, `~/.kiro/settings/mcp.json`,
+`~/.copilot/mcp-config.json`, and Cline's `cline_mcp_settings.json` in VS Code,
+Cursor and Windsurf. Restart the agent afterwards.
+
+- Opt-in, never part of plain `npx chisle`. Files with comments are reported and
+  left alone; the first write keeps `<file>.chisle-bak`.
+- Only stdio servers are wrapped; `url`/HTTP servers are untouched.
+- Tools whose names suggest file content or edits (`read_file`,
+  `get_file_contents`, `edit_file`, …) are never compressed.
+- Claude Code is never wrapped: its own hook already compresses `mcp__*` output.
+  Codex keeps TOML config and is not wrapped automatically.
+- `npx chisle --uninstall` unwraps everything and removes the proxy.
+
 ## Upgrading
 
 One command covers every agent that already has Chisle:
@@ -129,6 +173,7 @@ Add `--only <id>` to update one agent. The native command is listed where the ag
 | Pi | `npx chisle@latest --update --only pi`<br>or `pi install npm:chisle` | Needs `pi` on `PATH`, or Chisle reports it as not installed. |
 | Gemini CLI | `npx chisle@latest --update --only gemini`<br>or `gemini extensions install https://github.com/JayPokale/Chisle` | Needs `gemini` on `PATH`. |
 | Codex | `npx chisle@latest --update --only codex` | Refreshes the fenced block in `~/.codex/AGENTS.md`, leaving your own instructions alone. |
+| Copilot CLI | `npx chisle@latest --update --only copilot-cli` | Refreshes the ruleset, compressor and hook under `~/.copilot`. Wrapped MCP servers pick up a new proxy after `npx chisle@latest mcp wrap`. |
 | OpenCode | `npx chisle@latest --update --only opencode` | Refreshes the ruleset, skills, and compression plugin under the configured OpenCode root. |
 | Hermes Agent | `npx chisle@latest --update --only hermes` | Refreshes the skills in `~/.hermes/skills/`. |
 | Cursor | `npx chisle@latest --update --only cursor` | **Run inside the project.** |

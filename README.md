@@ -122,7 +122,7 @@ The loop on the right is the input axis: tool output is billed again on *every* 
 
 ## Install
 
-One command. Auto-detects your agents (Claude Code, Pi, Cursor, Windsurf, Cline, Kiro, Antigravity, Codex, Gemini, Copilot, OpenCode, Hermes) and wires each one. `--uninstall` puts everything back.
+One command. Auto-detects your agents (Claude Code, Pi, Cursor, Windsurf, Cline, Kiro, Antigravity, Codex, Gemini, Copilot, Copilot CLI, OpenCode, Hermes) and wires each one. `--uninstall` puts everything back. `npx chisle mcp wrap` extends tool-output compression to MCP servers in any agent ([details](INSTALL.md#mcp-output-compression-any-agent)).
 
 ```bash
 npx chisle
