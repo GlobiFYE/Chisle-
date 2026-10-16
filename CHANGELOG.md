@@ -5,6 +5,10 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.8.0] - 2026-10-16
+
+Minor: Copilot CLI as a global agent, MCP output compression for any agent, and a ruleset that thinks less.
+
 ### Changed
 - **Less hidden reasoning.** The "Thinking is billed too" rule now says to reason about the problem, never the wording: no drafting the answer in thinking, no checking it against the rules. On the default suite (Haiku 4.5, tools off, 21 cells) Chisle's billed output fell from 127% to 84% of a bare model and reasoning from 190% to 113%. `run-live.sh` gains `ARMS` and `CHISLE_SKILL` overrides for testing candidate rulesets.
 - README and site lead with the results where Chisle is leanest; the full tables stay in `docs/benchmarks.md`.
