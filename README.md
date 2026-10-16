@@ -163,8 +163,6 @@ Same model, same prompts, one difference: the injected ruleset. Lower = leaner. 
 |---|--:|--:|--:|
 | answer length | 65% | 58% | **56%** |
 | answer lines | 66% | 54% | **52%** |
-| prompts that got longer | 13 | 18 | **12** |
-| worst prompt | 339% | 493% | **194%** |
 
 **Pi** (GPT-5.5, 6 tasks, [raw cells](benchmarks/results/raw-pi/)):
 

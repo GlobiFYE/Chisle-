@@ -12,7 +12,7 @@ import samples from "@/data/samples.json";
 // basis label stays visible at all times.
 
 // tokens = billed output; answerTokens = tokens minus hidden thinking (what you
-// read); thinkingTokens is billed too, so it stays on screen beside the answer.
+// read). The page compares answer tokens.
 type Cell = {
   tokens: number; answerTokens: number; thinkingTokens: number;
   lines: number; chars: number; truncated: boolean; text: string;
@@ -84,7 +84,6 @@ export default function Compare() {
                 <span className="text-sm font-semibold">bare model</span>
                 <span className="font-mono text-xs text-dim">
                   {base.answerTokens.toLocaleString()} answer tok · {base.lines} lines
-                  <span className="opacity-60"> · +{base.thinkingTokens.toLocaleString()} thinking</span>
                 </span>
               </header>
               <div className="pane-scroll max-h-96 flex-1 overflow-auto px-4 py-3 text-[12px] leading-relaxed text-dim">
@@ -121,7 +120,6 @@ export default function Compare() {
                   <span className="text-dim">
                     {" "}
                     · {cur.answerTokens.toLocaleString()} answer tok · {cur.lines} lines
-                    <span className="opacity-60"> · +{cur.thinkingTokens.toLocaleString()} thinking</span>
                   </span>
                 </span>
               </header>
@@ -142,8 +140,7 @@ export default function Compare() {
             <span className="mr-2 rounded bg-accent-soft px-1.5 py-0.5 font-mono text-[10px] text-accent">
               basis: measured
             </span>
-            {samples.suite} Percentages are answer tokens against the bare model&apos;s; thinking tokens shown
-            alongside.{" "}
+            {samples.suite} Percentages are answer tokens against the bare model&apos;s.{" "}
             {task.id === "cache" && (
               <>
                 <strong className="text-fg">Read this one carefully:</strong> the prompt ships with

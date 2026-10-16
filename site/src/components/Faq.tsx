@@ -10,10 +10,6 @@ const QA = [
     a: "No. Terse ≠ incomplete. The rules cut words around the facts, never the facts: the fix, the gotcha, the caveat all stay. On 156 auto-graded maths and coding problems Chisle scored 156/156, the bare model 155/156.",
   },
   {
-    q: "What's the overhead of the plugin itself?",
-    a: "~900 tokens of rules, loaded at session start and served from the prompt cache on later requests, plus a ~50-token reminder per turn. In a real session the median request is ~248k tokens, so the rules are about 0.4% of it.",
-  },
-  {
     q: "Can the compressor corrupt my files?",
     a: "No. It runs behind a hard allowlist and never touches Read, Edit, or Write, whose exact bytes feed later edits. That boundary is covered by the test suite.",
   },

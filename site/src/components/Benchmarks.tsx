@@ -20,7 +20,6 @@ const ARMS = [
 const ROWS = [
   { label: "answer length · Claude Code", caveman: "65%", ponytail: "58%", chisle: "56%" },
   { label: "answer lines · Claude Code", caveman: "66%", ponytail: "54%", chisle: "52%" },
-  { label: "worst prompt · Claude Code", caveman: "339%", ponytail: "493%", chisle: "194%" },
   { label: "answer length · Pi", caveman: "56%", ponytail: "49%", chisle: "37%" },
   { label: "answer lines · Pi", caveman: "75%", ponytail: "38%", chisle: "37%" },
   { label: "billed, explanations · Pi", caveman: "43%", ponytail: "76%", chisle: "39%" },
