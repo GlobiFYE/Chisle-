@@ -89,7 +89,7 @@ function InstallCard() {
           <code>
             <span className="text-term-accent">npx</span> <span className="text-term-fg">chisle</span>
             {"\n"}
-            <span className="text-term-dim"># auto-detects all 12 agents · zero deps · zero network calls</span>
+            <span className="text-term-dim"># auto-detects all 13 agents · zero deps · zero network calls</span>
             {"\n"}
             <span className="text-term-dim"># preview: </span>
             <span className="text-term-fg/80">npx chisle</span> <span className="text-[#ffc56b]">--dry-run</span>
@@ -124,7 +124,7 @@ export default function Hero() {
               <span className="text-gradient">Keep the facts.</span>
             </h1>
             <p className="max-w-2xl text-base leading-relaxed text-fg/85 sm:text-lg">
-              Built for Claude Code. One command, twelve agents.
+              Built for Claude Code. One command, thirteen agents.
               <br className="hidden sm:block" />{" "}
               On coding prompts Claude&apos;s answers come back about half as long. Receipts,
               losses included, in the repo.

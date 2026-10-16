@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/chisle"><img src="https://img.shields.io/npm/v/chisle?style=flat-square&color=d78a3c" alt="npm version"></a>
-  <img src="https://img.shields.io/badge/works%20with-12%20agents-d78a3c?style=flat-square" alt="Works with 12 agents">
+  <img src="https://img.shields.io/badge/works%20with-13%20agents-d78a3c?style=flat-square" alt="Works with 13 agents">
   <a href="https://github.com/JayPokale/Chisle/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/JayPokale/Chisle/test.yml?style=flat-square&label=CI" alt="CI"></a>
   <img src="https://img.shields.io/badge/deps-0-2da44e?style=flat-square" alt="Zero deps">
   <img src="https://img.shields.io/badge/license-MIT-d78a3c?style=flat-square" alt="MIT">
@@ -22,7 +22,7 @@
 </p>
 
 <p align="center">
-  <strong>Built for Claude Code: coding answers come back about half as long, every number and loss published &middot; 12 agents &middot; zero dependencies &middot; one command</strong>
+  <strong>Built for Claude Code: coding answers come back about half as long, every number and loss published &middot; 13 agents &middot; zero dependencies &middot; one command</strong>
 </p>
 
 Chisle is a Claude Code plugin that makes Claude cheaper to run without making it dumber. It cuts what Claude writes: no filler, no hedging, no speculative abstractions, just the smallest code that works. It also cuts what Claude reads: a `PostToolUse` hook trims oversized tool output by ~46% before it re-enters the context window, where it would be re-billed on every later request. In agent-loop tests Claude with Chisle passes the same tasks as Claude without it. One `npx chisle` installs it, and the same ruleset ships to Pi, Cursor, Codex, Gemini, Copilot, OpenCode, Antigravity and four more agents. Every number here comes from committed raw transcripts, including the runs where it lost.

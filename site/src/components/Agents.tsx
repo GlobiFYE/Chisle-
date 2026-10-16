@@ -6,6 +6,7 @@ const AGENTS = [
   { name: "Claude Code", level: "full" },
   { name: "Pi", level: "full" },
   { name: "OpenCode", level: "full" },
+  { name: "Copilot CLI", level: "full" },
   { name: "Hermes", level: "skills" },
   { name: "Cursor", level: "rules" },
   { name: "Windsurf", level: "rules" },
@@ -31,11 +32,12 @@ export default function Agents() {
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-accent">Runs where you work</p>
-              <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Twelve agents, one install</h2>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Thirteen agents, one install</h2>
             </div>
             <p className="max-w-sm text-sm text-dim">
               Full coverage where the agent exposes hooks. Elsewhere the persona ships as a
-              generated rule file and stays always on.
+              generated rule file and stays always on, and <code>npx chisle mcp wrap</code> compresses
+              MCP tool output.
             </p>
           </div>
         </Reveal>

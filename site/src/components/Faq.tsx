@@ -19,7 +19,7 @@ const QA = [
   },
   {
     q: "Does it work outside Claude Code?",
-    a: "Twelve agents in total. Pi runs both axes with live toggling and a savings badge, the same as Claude Code. OpenCode runs both axes too, via a native plugin that compresses tool output plus the fenced ruleset and on-demand skills, but has no live toggle. Hermes gets the skills as /chisle commands. The ruleset alone ships to Cursor, Windsurf, Cline, Kiro, Antigravity, Codex, Gemini, and Copilot via generated rule files; there the persona is always on and the compressor does not apply.",
+    a: "Thirteen agents in total. Pi runs both axes with live toggling and a savings badge, the same as Claude Code. OpenCode runs both axes too, via a native plugin that compresses tool output plus the fenced ruleset and on-demand skills, but has no live toggle. Copilot CLI runs both axes through its global instructions file and a postToolUse hook, also without a live toggle. Hermes gets the skills as /chisle commands. The ruleset alone ships to Cursor, Windsurf, Cline, Kiro, Antigravity, Codex, Gemini, and Copilot via generated rule files; there the persona is always on, and npx chisle mcp wrap adds compression for MCP tool output.",
   },
   {
     q: "Does it fight with my Claude Code output style?",
@@ -31,7 +31,7 @@ const QA = [
   },
   {
     q: "How do I update it?",
-    a: "npx chisle@latest --update covers every agent you have installed. Plain npx chisle will not upgrade you: every install path skips what is already present, so the run reports success and changes nothing. The @latest pin matters too, since npx can serve a cached copy of the package. Add --only <id> for one agent: claude, pi, gemini, codex, opencode, hermes, cursor, windsurf, cline, kiro, copilot. Native equivalents work as well: claude plugin update chisle@chisle, or pi install npm:chisle. Cursor, Windsurf, Cline, Kiro, and Copilot keep their rule file inside the repo, so cd into the project first — run from your home directory and --update reports \"Nothing to update\" even when the project is set up correctly. Full per-agent table in INSTALL.md.",
+    a: "npx chisle@latest --update covers every agent you have installed. Plain npx chisle will not upgrade you: every install path skips what is already present, so the run reports success and changes nothing. The @latest pin matters too, since npx can serve a cached copy of the package. Add --only <id> for one agent: claude, pi, gemini, codex, copilot-cli, opencode, hermes, cursor, windsurf, cline, kiro, copilot. Native equivalents work as well: claude plugin update chisle@chisle, or pi install npm:chisle. Cursor, Windsurf, Cline, Kiro, and Copilot keep their rule file inside the repo, so cd into the project first — run from your home directory and --update reports \"Nothing to update\" even when the project is set up correctly. Full per-agent table in INSTALL.md.",
   },
 ];
 
