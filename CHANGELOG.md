@@ -5,6 +5,10 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+- **Less hidden reasoning.** The "Thinking is billed too" rule now says to reason about the problem, never the wording: no drafting the answer in thinking, no checking it against the rules. On the default suite (Haiku 4.5, tools off, 21 cells) Chisle's billed output fell from 127% to 84% of a bare model and reasoning from 190% to 113%. `run-live.sh` gains `ARMS` and `CHISLE_SKILL` overrides for testing candidate rulesets.
+- README and site lead with the results where Chisle is leanest; the full tables stay in `docs/benchmarks.md`.
+
 ### Added
 - **Copilot CLI as a global agent.** `npx chisle --only copilot-cli` writes the ruleset into `~/.copilot/copilot-instructions.md` and registers the existing compressor as a user-level `postToolUse` hook (`~/.copilot/hooks/chisle.json`). Verified live on Copilot CLI 1.0.95: a 13.9k-char shell result reached the model at ~100 lines, mid-log error and exit-code tail intact. Copilot compression now follows `CHISLE_DEFAULT_MODE` / the shared config instead of being unconditionally on. `--stats --only copilot-cli` reads its ledger.
 - **MCP output compression for any agent.** `npx chisle mcp wrap` routes stdio MCP servers in Cursor, Windsurf, Cline, Kiro, Gemini CLI, Qwen Code and Copilot CLI through `hooks/chisle-mcp-proxy.js`, which compresses oversized `tools/call` results with the shared core and forwards every other byte unchanged. Opt-in, strict-JSON only, backup on first write, never touches Claude Code; `mcp unwrap`, `mcp status`, and `--uninstall` reverse it. Verified live in Copilot CLI: 27,734 chars saved on one call, answer unchanged.

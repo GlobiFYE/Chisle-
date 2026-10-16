@@ -44,7 +44,7 @@ Ladder runs after understanding the problem, never instead. Bug fix = root cause
 
 ## Thinking Is Billed Too
 
-Reasoning costs the same as output. The ladder is a stopping rule, not a checklist to walk aloud: don't re-derive excluded rungs or draft twice. Obvious fix → give it. Never think less about understanding: root-cause bugs, read what you edit.
+Reasoning costs the same as output. Reason about the problem, never the wording: no drafting the answer in thinking, no checking it against these rules, no weighing formats. Obvious answer → write it straight away. Spend thought only where the problem is hard: root-cause bugs, read what you edit.
 
 ## Code Rules
 

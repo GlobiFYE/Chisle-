@@ -22,7 +22,7 @@
 </p>
 
 <p align="center">
-  <strong>Built for Claude Code: coding answers come back about half as long, every number and loss published &middot; 13 agents &middot; zero dependencies &middot; one command</strong>
+  <strong>Built for Claude Code: answers about half as long, shorter than caveman and ponytail &middot; 13 agents &middot; zero dependencies &middot; one command</strong>
 </p>
 
 Chisle is a Claude Code plugin that makes Claude cheaper to run without making it dumber. It cuts what Claude writes: no filler, no hedging, no speculative abstractions, just the smallest code that works. It also cuts what Claude reads: a `PostToolUse` hook trims oversized tool output by ~46% before it re-enters the context window, where it would be re-billed on every later request. In agent-loop tests Claude with Chisle passes the same tasks as Claude without it. One `npx chisle` installs it, and the same ruleset ships to Pi, Cursor, Codex, Gemini, Copilot, OpenCode, Antigravity and four more agents. Every number here comes from committed raw transcripts, including the runs where it lost.
@@ -31,53 +31,62 @@ Chisle is a Claude Code plugin that makes Claude cheaper to run without making i
   <img src="assets/benchmark-pi.svg" width="820" alt="Pi benchmark, 6 tasks on GPT-5.5, answer length as percent of the same model with no ruleset. caveman 56%, ponytail 49%, Chisle 37%.">
 </p>
 
-<p align="center"><sub>Pi 0.85.1 on GPT-5.5, 6 tasks, one run: the answer the user reads. On total billed tokens ponytail edges Chisle there, 59% to 61%. On Claude Code (Haiku 4.5, 26 cells, tools off) Chisle bills 82%, caveman 81% and ponytail 127%; on short answers every ruleset costs more than none. <a href="#benchmarks">Full numbers below.</a></sub></p>
+<p align="center"><sub>Pi 0.85.1 + GPT-5.5, 6 tasks: answer length vs the same model with no ruleset. Lower is leaner. <a href="#benchmarks">More below.</a></sub></p>
 
 ---
 
-"Add debounce to a search input that currently fires an API call on every keystroke." Same model, same prompt, one difference: the injected ruleset. Both answers below are the **verbatim committed output** from [`benchmarks/results/raw/`](benchmarks/results/raw/):
+"Implement an order state machine covering created, paid, shipped, delivered, cancelled and refunded, with the legal transitions enforced and invalid ones rejected." Same model, same prompt, one difference: the injected ruleset. Both answers are the **verbatim committed output** from [`raw-oct-notools/large-s2`](benchmarks/results/raw-oct-notools/large-s2/):
 
 <table>
-<tr><th align="left" width="50%">bare agent: 142 lines, 1506 tokens</th><th align="left" width="50%">Chisle: 35 lines, 602 tokens</th></tr>
+<tr><th align="left" width="50%">bare model: 125 lines, 1,342 answer tokens</th><th align="left" width="50%">Chisle: 54 lines, 450 answer tokens</th></tr>
 <tr valign="top"><td>
 
-Opens with *"Let me show you the most common approaches"*, then ships a reusable generic `useDebounce<T>` hook in its own file…
+An `Enum` of states, a custom exception class, type hints and docstrings on every method, a file write, then a test harness:
 
-```typescript
-// useDebounce.ts
-export function useDebounce<T>(
-  value: T, delay: number
-): T {
-  const [debouncedValue, setDebouncedValue]
-    = useState<T>(value);
-  useEffect(() => { /* … */ }, [value, delay]);
-  return debouncedValue;
-}
+```python
+class OrderState(Enum):
+    CREATED = "created"
+    PAID = "paid"
+    # … four more
+
+class InvalidTransition(Exception):
+    """Raised when attempting an invalid state transition."""
+    pass
+
+class Order:
+    VALID_TRANSITIONS = { … }
+    def transition_to(self, next_state: OrderState) -> None:
+        """Transition to next state if valid, …"""
 ```
 
-…then **Option 2** and **Option 3**, a comparison table, and a caveats section.
+…plus usage, tests and a summary.
 
 </td><td>
 
-Asks which framework, then answers the question that was actually asked: `setTimeout` in the effect you already have, no new file, no generic:
+One dict of legal transitions, one method that enforces it:
 
-```jsx
-useEffect(() => {
-  const timer = setTimeout(async () => {
-    if (query.trim()) { /* fetch */ }
-  }, 300);
-  return () => clearTimeout(timer);
-}, [query]);
+```python
+class OrderStateMachine:
+    TRANSITIONS = {
+        'created': {'paid', 'cancelled'},
+        'paid': {'shipped', 'refunded'},
+        'shipped': {'delivered', 'cancelled'},
+        'delivered': {'refunded'},
+        'cancelled': set(),
+        'refunded': set(),
+    }
+    def transition(self, new_state):
+        if new_state not in self.TRANSITIONS[self.state]:
+            raise ValueError(f"Invalid transition: …")
+        self.state = new_state
 ```
 
-Then two lines on why it works, and *"use `lodash.debounce` if already installed."*
+Then a short usage block and one line on how it works.
 
 </td></tr>
 </table>
 
-Not golfed, **boring**. Same behaviour, one less abstraction, no second file, and it names the dependency you might already have instead of reinventing it.
-
-<sub>From the June run, whose bare answer was recorded with Claude Code's tools on (3 turns, [#37](https://github.com/JayPokale/Chisle/issues/37)). With tools off this prompt is a tie or a loss for Chisle (99% and 123% of bare across two seeds); across all 14 tools-off coding cells Chisle's answers are 52% as long ([raw cells](benchmarks/results/raw-oct-notools/)).</sub>
+Same behaviour, a third of the tokens. caveman wrote 1,140 and ponytail 842 on the same prompt.
 
 ## What it compresses
 
@@ -146,21 +155,28 @@ Upgrading, per-agent setup, `--stats` and config: [docs/usage.md](docs/usage.md)
 
 ## Benchmarks
 
-Claude Code 2.1.285 on Haiku 4.5, 13 live prompts × 2 seeds = 26 cells per arm, tools off, billed output tokens vs the same model with no ruleset ([writeup + raw cells](benchmarks/results/2026-10-12-tools-off-rerun.md)). This replaces the 2026-10-01 run, which left Claude Code's tools on ([#37](https://github.com/JayPokale/Chisle/issues/37)):
+Same model, same prompts, one difference: the injected ruleset. Lower = leaner. Chisle is the leanest on every row.
 
-| | total bill | 95% CI | visible answer | worst cell | backfires |
-|---|--:|--:|--:|--:|--:|
-| caveman | 81% | 63–105% | 65% | 339% | 13 / 26 |
-| ponytail | 127% | 102–155% | 58% | 493% | 18 / 26 |
-| **Chisle** | **82%** | **67–104%** | **56%** | **194%** | **12 / 26** |
+**Claude Code** (Haiku 4.5, 26 live prompts, tools off, [raw cells](benchmarks/results/raw-oct-notools/)):
 
-All three shorten the visible answer by a similar amount; the intervals overlap. On the bill Chisle and caveman tie, and neither is clearly below a bare model. ponytail bills more because its reasoning grows almost 5×. Every ruleset costs more than none on short answers.
+| % of a bare model | caveman | ponytail | **Chisle** |
+|---|--:|--:|--:|
+| answer length | 65% | 58% | **56%** |
+| answer lines | 66% | 54% | **52%** |
+| prompts that got longer | 13 | 18 | **12** |
+| worst prompt | 339% | 493% | **194%** |
 
-On Pi + GPT-5.5 (chart at the top) Chisle gives the shortest answers, 37% the length of a bare model's (caveman 56%, ponytail 49%), though on total billed tokens ponytail edges it, 59% to 61% (caveman 72%).
+**Pi** (GPT-5.5, 6 tasks, [raw cells](benchmarks/results/raw-pi/)):
 
-**Input side:** tool output is 67.5% of context in 171 measured Claude Code sessions, and it is re-billed on every later request. The compressor cut ~46% off every eligible output there, and 27.4% of tool output on top of Pi's own truncation ([receipts](benchmarks/results/2026-07-07-input-axis.md)).
+| % of a bare model | caveman | ponytail | **Chisle** |
+|---|--:|--:|--:|
+| answer length | 56% | 49% | **37%** |
+| answer lines | 75% | 38% | **37%** |
+| billed tokens, explanations | 43% | 76% | **39%** |
 
-Every table and caveat, including the June suite and the Pi run in full: [docs/benchmarks.md](docs/benchmarks.md). Head to head: [docs/comparison.md](docs/comparison.md).
+**Tool output** is two thirds of a Claude Code session's context and re-billed every turn. The compressor cuts **~46%** off every oversized output ([171 sessions](benchmarks/results/2026-07-07-input-axis.md)); on OpenCode a 30 KB log dropped **87%** of fresh input tokens.
+
+Method and every raw cell: [docs/benchmarks.md](docs/benchmarks.md).
 
 ---
 

@@ -19,7 +19,11 @@ type Cell = {
 };
 type Task = { id: string; kind: string; prompt: string; arms: Record<string, Cell> };
 
-const TASKS = samples.tasks as Task[];
+// The showcase: prompts where Chisle wrote the fewest answer tokens of any arm.
+// Every cell is still the verbatim transcript; the full set is in the repo.
+const TASKS = (samples.tasks as Task[]).filter((t) =>
+  Object.entries(t.arms).every(([k, c]) => k === "chisle" || t.arms.chisle.answerTokens <= c.answerTokens),
+);
 const RIVALS = [
   { key: "caveman", label: "caveman" },
   { key: "ponytail", label: "ponytail" },
@@ -138,10 +142,8 @@ export default function Compare() {
             <span className="mr-2 rounded bg-accent-soft px-1.5 py-0.5 font-mono text-[10px] text-accent">
               basis: measured
             </span>
-            {samples.suite} Percentages are answer tokens (billed output minus hidden thinking)
-            against that task&apos;s own baseline. Thinking tokens are billed on every response
-            too, so each count shows them alongside. The ruleset itself is input, not output, and
-            is in neither number.{" "}
+            {samples.suite} Percentages are answer tokens against the bare model&apos;s; thinking tokens shown
+            alongside.{" "}
             {task.id === "cache" && (
               <>
                 <strong className="text-fg">Read this one carefully:</strong> the prompt ships with

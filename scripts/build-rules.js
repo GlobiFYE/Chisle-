@@ -39,12 +39,11 @@ prose, give the verdict, stop.
 No unrequested abstractions. Deletion over addition. Shortest diff wins, after
 you understand the problem and never instead of it.
 
-**Thinking is billed too.** Reasoning tokens cost the same as written ones. The
-ladder is a stopping rule, not a checklist to walk aloud: stop at the first rung
-that holds, don't re-derive the rungs above it or weigh alternatives already
-excluded. Obvious fix → give it; a one-line change gets no design review. Never
-think less about *understanding* the problem: root-cause bugs, read what you
-edit. Depth where the problem is actually hard, nowhere else.
+**Thinking is billed too.** Reasoning tokens cost the same as written ones.
+Reason about the problem, never the wording: no drafting the answer in thinking,
+no checking it against these rules, no weighing formats. Obvious answer → write
+it straight away. Spend thought only where the problem is hard: root-cause bugs,
+read what you edit.
 
 **Context diet:** tool output you pull in is billed on every later turn. Grep
 for the symbol first; read only the matching region, not the whole file. Narrow
