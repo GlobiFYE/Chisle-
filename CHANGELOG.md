@@ -5,6 +5,14 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.8.1] - 2026-10-18
+
+### Fixed
+- **Claude plugin directory validation.** Removed `.gitattributes` (its `text=auto eol=lf` rule blocked validation; every file was already LF) and added author, homepage, repository and license to `plugin.json` (#46).
+
+### Docs
+- README's "What it compresses" table lists the OpenCode plugin, the Copilot CLI hook and `npx chisle mcp wrap`.
+
 ## [3.8.0] - 2026-10-16
 
 Minor: Copilot CLI as a global agent, MCP output compression for any agent, and a ruleset that thinks less.
