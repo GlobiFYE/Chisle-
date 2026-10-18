@@ -94,7 +94,8 @@ Same behaviour, a third of the tokens. caveman wrote 1,140 and ponytail 842 on t
 |---|---|---|
 | **Output: prose** | filler, hedging, manufactured structure | zero-fluff ruleset, injected per session |
 | **Output: code** | speculative abstractions, unrequested boilerplate | YAGNI efficiency ladder |
-| **Input: context** | oversized tool output flooding the window | Claude `PostToolUse` / Pi `tool_result`: scrub, elide, dedup, plus prevention rules |
+| **Input: context** | oversized tool output flooding the window | Claude `PostToolUse`, Pi `tool_result`, OpenCode plugin, Copilot CLI `postToolUse`: scrub, elide, dedup, plus prevention rules |
+| **Input: MCP** | oversized MCP tool results in any agent | `npx chisle mcp wrap`: a proxy in front of each stdio MCP server (Cursor, Windsurf, Cline, Kiro, Gemini, Qwen Code, Copilot CLI) |
 
 Where each one attaches to a session:
 

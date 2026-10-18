@@ -20,7 +20,7 @@ const AXES = [
     icon: "compress",
     name: "Output compressor",
     what: "What survives into context",
-    body: "A post-tool hook shrinks tool results before the model reads them: ANSI scrub, head + tail elide with error-line salvage, same-session dedup. Never touches Read, Edit, or Write. Runs on Claude Code, Pi, and OpenCode.",
+    body: "A post-tool hook shrinks tool results before the model reads them: ANSI scrub, head + tail elide with error-line salvage, same-session dedup. Never touches Read, Edit, or Write. Runs on Claude Code, Pi, OpenCode and Copilot CLI, and on the MCP servers of any agent via npx chisle mcp wrap.",
     demo: [
       ["scrub", "strips ANSI escapes, collapses blank runs and `line repeated N×`, losslessly"],
       ["elide", "oversized output → head + tail, error-like lines salvaged from the cut"],
