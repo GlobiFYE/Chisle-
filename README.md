@@ -4,6 +4,8 @@
 
 <h1 align="center">Chisle</h1>
 
+<h3 align="center">Fewer tokens than caveman and ponytail. No accuracy lost.</h3>
+
 <p align="center">
   <em>Your AI talks less, builds less, reads less, and says more. Like a senior dev who bills by the syllable.</em>
 </p>
@@ -172,6 +174,8 @@ Same model, same prompts, one difference: the injected ruleset. Lower = leaner. 
 | answer length | 56% | 49% | **37%** |
 | answer lines | 75% | 38% | **37%** |
 | billed tokens, explanations | 43% | 76% | **39%** |
+
+**Accuracy** holds against the bare model: 156/156 vs 155/156 on auto-graded maths and coding, 48/60 vs 49/60 on agentic hidden-test repos, Fisher p = 1.000 on both ([writeup](benchmarks/results/2026-09-14-quality-and-agentic.md)). No judge model anywhere.
 
 **Tool output** is two thirds of a Claude Code session's context and re-billed every turn. The compressor cuts **~46%** off every oversized output ([171 sessions](benchmarks/results/2026-07-07-input-axis.md)); on OpenCode a 30 KB log dropped **87%** of fresh input tokens.
 

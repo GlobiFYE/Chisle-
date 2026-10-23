@@ -1,7 +1,7 @@
 {
   "name": "chisle",
   "version": "3.8.1",
-  "description": "Maximum-efficiency dev mode for AI coding agents. Zero-fluff prose, YAGNI-first code, and safe tool-output compression.",
+  "description": "Fewer tokens than caveman and ponytail, no accuracy lost. Zero-fluff prose, YAGNI-first code, and safe tool-output compression for 13 AI coding agents.",
   "keywords": [
     "claude-code",
     "claude-code-plugin",

@@ -119,14 +119,14 @@ export default function Hero() {
             className="flex flex-col items-center gap-5 text-center"
           >
             <h1 className="text-4xl font-semibold leading-[1.08] tracking-tight sm:text-6xl lg:text-7xl">
-              Cut the filler.
+              Fewer tokens than caveman and ponytail.
               <br />
-              <span className="text-gradient">Keep the facts.</span>
+              <span className="text-gradient">No accuracy lost.</span>
             </h1>
             <p className="max-w-2xl text-base leading-relaxed text-fg/85 sm:text-lg">
               Built for Claude Code. One command, thirteen agents.
               <br className="hidden sm:block" />{" "}
-              Answers about half as long, shorter than caveman and ponytail. Every number traces to a
+              Answers about half as long, same pass rate as the bare model. Every number traces to a
               committed transcript.
             </p>
           </motion.div>
