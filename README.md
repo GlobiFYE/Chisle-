@@ -30,10 +30,10 @@
 Chisle is a Claude Code plugin that makes Claude cheaper to run without making it dumber. It cuts what Claude writes: no filler, no hedging, no speculative abstractions, just the smallest code that works. It also cuts what Claude reads: a `PostToolUse` hook trims oversized tool output by ~46% before it re-enters the context window, where it would be re-billed on every later request. In agent-loop tests Claude with Chisle passes the same tasks as Claude without it. One `npx chisle` installs it, and the same ruleset ships to Pi, Cursor, Codex, Gemini, Copilot, OpenCode, Antigravity and four more agents. Every number here comes from committed raw transcripts, including the runs where it lost.
 
 <p align="center">
-  <img src="assets/benchmark-pi.svg" width="820" alt="Pi benchmark, 6 tasks on GPT-5.5, answer length as percent of the same model with no ruleset. caveman 56%, ponytail 49%, Chisle 37%.">
+  <img src="assets/benchmark-pi.svg" width="820" alt="Pi benchmark, 6 tasks, answer length as percent of the same model with no ruleset. caveman 56%, ponytail 49%, Chisle 37%.">
 </p>
 
-<p align="center"><sub>Pi 0.85.1 + GPT-5.5, 6 tasks: answer length vs the same model with no ruleset. Lower is leaner. <a href="#benchmarks">More below.</a></sub></p>
+<p align="center"><sub>Pi, 6 tasks: answer length vs the same model with no ruleset. Lower is leaner. <a href="#benchmarks">More below.</a></sub></p>
 
 ---
 
